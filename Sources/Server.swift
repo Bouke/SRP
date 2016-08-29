@@ -54,7 +54,6 @@ public class Server {
         sessionKey = H(S.data)
 
         let M = calculate_M(group: group, alg: alg, username: username, salt: salt, A: A, B: B, K: sessionKey!)
-        print(Bignum(data: M))
         guard clientM == M else { throw Error.authenticationFailed }
         isAuthenticated = true
 
