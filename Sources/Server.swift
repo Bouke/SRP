@@ -3,16 +3,16 @@ import BigInt
 import CommonCrypto
 
 public class Server {
-    internal let b: BigUInt
+    let b: BigUInt
     public let B: Data
 
     public let salt: Data
     public let username: String
 
-    internal let v: BigUInt
+    let v: BigUInt
 
-    internal let group: Group
-    internal let alg: Digest
+    let group: Group
+    let alg: Digest
 
     public private(set) var isAuthenticated = false
     public private(set) var sessionKey: Data? = nil

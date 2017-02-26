@@ -3,16 +3,16 @@ import BigInt
 import CommonCrypto
 
 public class Client {
-    internal let a: BigUInt
+    let a: BigUInt
     public let A: Data
 
-    internal let group: Group
-    internal let alg: Digest
+    let group: Group
+    let alg: Digest
 
-    internal let username: String
-    internal let password: String
+    let username: String
+    let password: String
 
-    internal var HAMK: Data? = nil
+    var HAMK: Data? = nil
 
     public private(set) var isAuthenticated = false
     public private(set) var sessionKey: Data? = nil
