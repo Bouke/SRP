@@ -1,9 +1,9 @@
 import Foundation
-import Bignum
+import BigInt
 import CommonCrypto
 
 public class Client {
-    internal let a: Bignum
+    internal let a: BigUInt
     public let A: Data
 
     internal let group: Group
@@ -24,12 +24,12 @@ public class Client {
         self.password = password
 
         if let secret = secret {
-            a = Bignum(data: secret)
+            a = BigUInt(secret)
         } else {
-            a = Bignum(data: generateRandomBytes(count: 32))
+            a = BigUInt(generateRandomBytes(count: 32))
         }
         // A = g^a % N
-        A = mod_exp(group.g, a, group.N).data
+        A = group.g.power(a, modulus: group.N).serialize()
     }
 
     public func startAuthentication() -> (username: String, A: Data) {
@@ -45,18 +45,20 @@ public class Client {
         let x = calculate_x(alg: alg, salt: salt, username: username, password: password)
         let v = calculate_v(group: group, x: x)
 
-        let B_ = Bignum(data: B)
+        let B_ = BigUInt(B)
 
         // shared secret
         // S = (B - kg^x) ^ (a + ux)
-        let S = mod_exp(B_ - k * v, a + u * x, N)
+        // Note that v = g^x, and that B - kg^x might become negative, which 
+        // cannot be stored in BigUInt. So we'll add N to B_ and make sure kv
+        // isn't greater than N.
+        let S = (B_ + N - k * v % N).power(a + u * x, modulus: N)
 
         // session key
-        sessionKey = H(S.data)
+        sessionKey = H(S.serialize())
 
         // client verification
         let M = calculate_M(group: group, alg: alg, username: username, salt: salt, A: A, B: B, K: sessionKey!)
-        print(Bignum(data: M))
 
         // server verification
         HAMK = calculate_HAMK(alg: alg, A: A, M: M, K: sessionKey!)

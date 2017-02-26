@@ -1,15 +1,15 @@
 import Foundation
-import Bignum
+import BigInt
 import CommonCrypto
 
 public class Server {
-    internal let b: Bignum
+    internal let b: BigUInt
     public let B: Data
 
     public let salt: Data
     public let username: String
 
-    internal let v: Bignum
+    internal let v: BigUInt
 
     internal let group: Group
     internal let alg: Digest
@@ -24,16 +24,16 @@ public class Server {
         self.username = username
 
         if let secret = secret {
-            b = Bignum(data: secret)
+            b = BigUInt(secret)
         } else {
-            b = Bignum(data: generateRandomBytes(count: 32))
+            b = BigUInt(generateRandomBytes(count: 32))
         }
         let k = calculate_k(group: group, alg: alg)
-        v = Bignum(data: verificationKey)
+        v = BigUInt(verificationKey)
         let N = group.N
         let g = group.g
-        // B = k*v + g^b % N
-        B = mod_add(k * v, mod_exp(g, b, N), N).data
+        // B = (k*v + g^b % N) % N
+        B = ((k * v + g.power(b, modulus: N)) % N).serialize()
     }
 
     public func getChallenge() -> (salt: Data, B: Data) {
@@ -42,16 +42,16 @@ public class Server {
 
     public func verifySession(A: Data, M clientM: Data) throws -> Data {
         let u = calculate_u(group: group, alg: alg, A: A, B: B)
-        let A_ = Bignum(data: A)
+        let A_ = BigUInt(A)
         let N = group.N
 
         // shared secret
         // S = (Av^u) mod N
-        let S = mod_exp(A_ * mod_exp(v, u, N), b, N)
+        let S = (A_ * v.power(u, modulus: N)).power(b, modulus: N)
 
         let H = alg.hash
         // K = H(S)
-        sessionKey = H(S.data)
+        sessionKey = H(S.serialize())
 
         let M = calculate_M(group: group, alg: alg, username: username, salt: salt, A: A, B: B, K: sessionKey!)
         guard clientM == M else { throw Error.authenticationFailed }
