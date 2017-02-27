@@ -66,8 +66,8 @@ public class Client {
     }
 
     public func verifySession(HAMK serverHAMK: Data) throws {
-        guard let HAMK = HAMK else { throw Error.authenticationFailed }
-        guard HAMK == serverHAMK else { throw Error.authenticationFailed }
+        guard let HAMK = HAMK else { throw SRPError.authenticationFailed }
+        guard HAMK == serverHAMK else { throw SRPError.authenticationFailed }
         isAuthenticated = true
     }
 }

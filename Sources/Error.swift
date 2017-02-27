@@ -1,5 +1,5 @@
 import Foundation
 
-public enum Error: Swift.Error {
+public enum SRPError: Error {
     case authenticationFailed
 }

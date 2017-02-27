@@ -54,7 +54,7 @@ public class Server {
         sessionKey = H(S.serialize())
 
         let M = calculate_M(group: group, alg: alg, username: username, salt: salt, A: A, B: B, K: sessionKey!)
-        guard clientM == M else { throw Error.authenticationFailed }
+        guard clientM == M else { throw SRPError.authenticationFailed }
         isAuthenticated = true
 
         return calculate_HAMK(alg: alg, A: A, M: M, K: sessionKey!)

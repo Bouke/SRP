@@ -1,5 +1,6 @@
 import XCTest
 import CommonCrypto
+
 @testable import SRP
 
 class SRPTests: XCTestCase {
@@ -38,7 +39,7 @@ class SRPTests: XCTestCase {
             // Using M, the server verifies the proof and calculates a proof for the client
             // Server->Client: H(AMK)
             HAMK = try server.verifySession(A: client.A, M: M)
-        } catch SRP.Error.authenticationFailed {
+        } catch SRPError.authenticationFailed {
             return XCTFail("Client generated invalid M")
         }
 
@@ -49,7 +50,7 @@ class SRPTests: XCTestCase {
         do {
             // Using H(AMK), the client verifies the server's proof
             try client.verifySession(HAMK: HAMK)
-        } catch SRP.Error.authenticationFailed {
+        } catch SRPError.authenticationFailed {
             return XCTFail("Server generated invalid H(AMK)")
         }
 
