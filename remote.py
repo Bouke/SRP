@@ -55,4 +55,4 @@ print "HAMK: " + binascii.hexlify(HAMK)
 
 # At this point the authentication process is complete.
 assert svr.authenticated()
-print "K: " + srp.get_session_key()
+print "K: " + binascii.hexlify(svr.get_session_key())
