@@ -15,11 +15,16 @@ except NameError:
     pass
 
 
+# srptools uses '%x' formatting on strings, which doesn't
+# include leading zeroes. This function makes sure that
+# all hex outputs are of even length.
 def even_length_hex(hex):
     if len(hex) % 2 == 1:
         hex = "0" + hex
     return hex
 
+# 8192 bits prime is not a built-in prime in srptools,
+# so a custom prime/generator is defined.
 PRIME_8192_GEN = hex_from(19)
 PRIME_8192 = '''\
 FFFFFFFFFFFFFFFFC90FDAA22168C234C4C6628B80DC1CD129024E08\
