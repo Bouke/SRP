@@ -1,5 +1,5 @@
 import XCTest
-import CommonCrypto
+import Cryptor
 
 @testable import SRP
 
@@ -21,7 +21,7 @@ class SRPTests: XCTestCase {
 
         // Client->Server: I (username)
         // Server retrieves salt and verificationKey from permanent storage
-        let server = Server(salt: salt, username: username, verificationKey: verificationKey, secret: generateRandomBytes(count: 32))
+        let server = Server(salt: salt, username: username, verificationKey: verificationKey, secret: Data(bytes: try! Random.generate(byteCount: 32)))
 
         // The server generates the challenge: pre-defined salt, public key B
         // Server->Client: salt, B

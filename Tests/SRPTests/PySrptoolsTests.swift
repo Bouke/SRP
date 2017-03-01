@@ -1,21 +1,21 @@
 import XCTest
-import CommonCrypto
+import Cryptor
 
 @testable import SRP
 
 class PySrptoolsTests: XCTestCase {
     func testClient() {
-        runClientTest(group: .N1024, algorithm: .SHA1, username: "bouke", password: "test")
-        runClientTest(group: .N2048, algorithm: .SHA1, username: "bouke", password: "test")
-        runClientTest(group: .N3072, algorithm: .SHA1, username: "bouke", password: "test")
-        runClientTest(group: .N4096, algorithm: .SHA1, username: "bouke", password: "test")
-        runClientTest(group: .N6144, algorithm: .SHA1, username: "bouke", password: "test")
-        runClientTest(group: .N8192, algorithm: .SHA1, username: "bouke", password: "test")
+        runClientTest(group: .N1024, algorithm: .sha1, username: "bouke", password: "test")
+        runClientTest(group: .N2048, algorithm: .sha1, username: "bouke", password: "test")
+        runClientTest(group: .N3072, algorithm: .sha1, username: "bouke", password: "test")
+        runClientTest(group: .N4096, algorithm: .sha1, username: "bouke", password: "test")
+        runClientTest(group: .N6144, algorithm: .sha1, username: "bouke", password: "test")
+        runClientTest(group: .N8192, algorithm: .sha1, username: "bouke", password: "test")
     }
 
     func runClientTest(
         group: Group,
-        algorithm: Digest,
+        algorithm: Digest.Algorithm,
         username: String,
         password: String,
         file: StaticString = #file,
@@ -23,11 +23,11 @@ class PySrptoolsTests: XCTestCase {
     {
         let server: RemoteServer
         do {
-            server = try RemoteServer(group: group, alg: algorithm, username: username, password: password)
+            server = try RemoteServer(group: group, algorithm: algorithm, username: username, password: password)
         } catch {
             return XCTFail("Could not start remote server: \(error)", file: file, line: line)
         }
-        let client = Client(group: group, alg: algorithm, username: username, password: password)
+        let client = Client(group: group, algorithm: algorithm, username: username, password: password)
 
         // The server generates the challenge: pre-defined salt, public key B
         // Server->Client: salt, B
@@ -74,28 +74,28 @@ class PySrptoolsTests: XCTestCase {
     }
 
     func testServer() {
-        runServerTest(group: .N1024, algorithm: .SHA1, username: "bouke", password: "test")
-        runServerTest(group: .N2048, algorithm: .SHA1, username: "bouke", password: "test")
-        runServerTest(group: .N3072, algorithm: .SHA1, username: "bouke", password: "test")
-        runServerTest(group: .N4096, algorithm: .SHA1, username: "bouke", password: "test")
-        runServerTest(group: .N6144, algorithm: .SHA1, username: "bouke", password: "test")
-        runServerTest(group: .N8192, algorithm: .SHA1, username: "bouke", password: "test")
+        runServerTest(group: .N1024, algorithm: .sha1, username: "bouke", password: "test")
+        runServerTest(group: .N2048, algorithm: .sha1, username: "bouke", password: "test")
+        runServerTest(group: .N3072, algorithm: .sha1, username: "bouke", password: "test")
+        runServerTest(group: .N4096, algorithm: .sha1, username: "bouke", password: "test")
+        runServerTest(group: .N6144, algorithm: .sha1, username: "bouke", password: "test")
+        runServerTest(group: .N8192, algorithm: .sha1, username: "bouke", password: "test")
     }
 
     func runServerTest(
         group: Group,
-        algorithm: Digest,
+        algorithm: Digest.Algorithm,
         username: String,
         password: String,
         file: StaticString = #file,
         line: UInt = #line)
     {
-        let (salt, verificationKey) = createSaltedVerificationKey(username: username, password: password, group: group, alg: algorithm)
-        let server = Server(group: group, alg: algorithm, salt: salt, username: username, verificationKey: verificationKey)
+        let (salt, verificationKey) = createSaltedVerificationKey(username: username, password: password, group: group, algorithm: algorithm)
+        let server = Server(group: group, algorithm: algorithm, salt: salt, username: username, verificationKey: verificationKey)
 
         let client: RemoteClient
         do {
-            client = try RemoteClient(group: group, alg: algorithm, username: username, password: password)
+            client = try RemoteClient(group: group, algorithm: algorithm, username: username, password: password)
         } catch {
             return XCTFail("Could not start remote client: \(error)", file: file, line: line)
         }

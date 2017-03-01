@@ -84,7 +84,7 @@ parser.add_argument("password")
 
 args = parser.parse_args()
 
-assert args.algorithm == "SHA1", "Only SHA1 is supported"
+assert args.algorithm == "sha1", "Only SHA1 is supported"
 prime = groups[args.group][0]
 generator = groups[args.group][1]
 context = SRPContext(args.username, args.password, prime=prime, generator=generator)

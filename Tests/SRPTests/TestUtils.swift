@@ -1,4 +1,4 @@
-import CommonCrypto
+import Cryptor
 import Foundation
 import SRP
 
@@ -120,7 +120,7 @@ class Remote {
 }
 
 class RemoteServer: Remote {
-    init(group: Group = .N2048, alg: Digest = .SHA1, username: String, password: String) throws {
+    init(group: Group = .N2048, algorithm: Digest.Algorithm = .sha1, username: String, password: String) throws {
         guard let python = ProcessInfo.processInfo.environment["PYTHON"] else {
             throw RemoteError.noPython
         }
@@ -138,7 +138,7 @@ class RemoteServer: Remote {
                              username,
                              password,
                              "--group", "\(group)",
-                             "--algorithm", "\(alg)"]
+                             "--algorithm", "\(algorithm)"]
         super.init(process: process)
     }
 
@@ -182,7 +182,7 @@ class RemoteServer: Remote {
 }
 
 class RemoteClient: Remote {
-    init(group: Group = .N2048, alg: Digest = .SHA1, username: String, password: String) throws {
+    init(group: Group = .N2048, algorithm: Digest.Algorithm = .sha1, username: String, password: String) throws {
         guard let python = ProcessInfo.processInfo.environment["PYTHON"] else {
             throw RemoteError.noPython
         }
@@ -194,7 +194,7 @@ class RemoteClient: Remote {
                              username,
                              password,
                              "--group", "\(group)",
-                             "--algorithm", "\(alg)"]
+                             "--algorithm", "\(algorithm)"]
         super.init(process: process)
     }
 

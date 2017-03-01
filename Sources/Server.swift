@@ -1,6 +1,6 @@
 import Foundation
 import BigInt
-import CommonCrypto
+import Cryptor
 
 public class Server {
     let b: BigUInt
@@ -12,23 +12,23 @@ public class Server {
     let v: BigUInt
 
     let group: Group
-    let alg: Digest
+    let algorithm: Digest.Algorithm
 
     public private(set) var isAuthenticated = false
     public private(set) var sessionKey: Data? = nil
 
-    public init (group: Group = .N2048, alg: Digest = .SHA1, salt: Data, username: String, verificationKey: Data, secret: Data? = nil) {
+    public init (group: Group = .N2048, algorithm: Digest.Algorithm = .sha1, salt: Data, username: String, verificationKey: Data, secret: Data? = nil) {
         self.group = group
-        self.alg = alg
+        self.algorithm = algorithm
         self.salt = salt
         self.username = username
 
         if let secret = secret {
             b = BigUInt(secret)
         } else {
-            b = BigUInt(generateRandomBytes(count: 32))
+            b = BigUInt(Data(bytes: try! Random.generate(byteCount: 32)))
         }
-        let k = calculate_k(group: group, alg: alg)
+        let k = calculate_k(group: group, algorithm: algorithm)
         v = BigUInt(verificationKey)
         let N = group.N
         let g = group.g
@@ -41,7 +41,7 @@ public class Server {
     }
 
     public func verifySession(A: Data, M clientM: Data) throws -> Data {
-        let u = calculate_u(group: group, alg: alg, A: A, B: B)
+        let u = calculate_u(group: group, algorithm: algorithm, A: A, B: B)
         let A_ = BigUInt(A)
         let N = group.N
 
@@ -49,14 +49,14 @@ public class Server {
         // S = (Av^u) mod N
         let S = (A_ * v.power(u, modulus: N)).power(b, modulus: N)
 
-        let H = alg.hash
+        let H = Digest.hasher(algorithm)
         // K = H(S)
         sessionKey = H(S.serialize())
 
-        let M = calculate_M(group: group, alg: alg, username: username, salt: salt, A: A, B: B, K: sessionKey!)
+        let M = calculate_M(group: group, algorithm: algorithm, username: username, salt: salt, A: A, B: B, K: sessionKey!)
         guard clientM == M else { throw SRPError.authenticationFailed }
         isAuthenticated = true
 
-        return calculate_HAMK(alg: alg, A: A, M: M, K: sessionKey!)
+        return calculate_HAMK(algorithm: algorithm, A: A, M: M, K: sessionKey!)
     }
 }
