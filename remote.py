@@ -52,13 +52,6 @@ B7C5DA76F550AA3D8A1FBFF0EB19CCB1A313D55CDA56C9EC2EF29632\
 FC026E479558E4475677E9AA9E3050E2765694DFC81F56E880B96E71\
 60C980DD98EDD3DFFFFFFFFFFFFFFFFF'''
 
-parser = argparse.ArgumentParser(description="SRP Server")
-parser.add_argument("--group", default="N2048")
-parser.add_argument("--algorithm", default="SHA1")
-parser.add_argument("username")
-parser.add_argument("password")
-args = parser.parse_args()
-
 groups = {
     "N1024": (constants.PRIME_1024, constants.PRIME_1024_GEN),
     "N1536": (constants.PRIME_1536, constants.PRIME_1536_GEN),
@@ -69,33 +62,48 @@ groups = {
     "N8192": (PRIME_8192, PRIME_8192_GEN),
 }
 
+parser = argparse.ArgumentParser(description="SRP Server")
+parser.add_argument("--group", default="N2048")
+parser.add_argument("--algorithm", default="SHA1")
+
+subparsers = parser.add_subparsers(dest="command")
+subparsers.is_required = True
+subparsers.add_parser("server")
+
+parser.add_argument("username")
+parser.add_argument("password")
+
+args = parser.parse_args()
+
+assert args.algorithm == "SHA1", "Only SHA1 is supported"
 prime = groups[args.group][0]
 generator = groups[args.group][1]
 context = SRPContext(args.username, args.password, prime=prime, generator=generator)
-username, password_verifier, salt = context.get_user_data_triplet()
 
-# Client => Server: username, A
-sys.stdout.write("A: ")
-sys.stdout.flush()
-A = input()
+if args.command == "server":
+    _, password_verifier, salt = context.get_user_data_triplet()
 
-# Receive username from client and generate server public.
-server_session = SRPServerSession(context, password_verifier)
+    # Client => Server: username, A
+    sys.stdout.write("A: ")
+    sys.stdout.flush()
+    A = input()
 
-# Server => Client: s, B
-print("s: " + even_length_hex(salt))
-print("B: " + even_length_hex(server_session.public))
+    # Receive username from client and generate server public.
+    server_session = SRPServerSession(context, password_verifier)
 
-# Client => Server: M
-sys.stdout.write("M: ")
-sys.stdout.flush()
-M = input()
+    # Server => Client: s, B
+    print("s: " + even_length_hex(salt))
+    print("B: " + even_length_hex(server_session.public))
 
-# Process client public and verify session key proof.
-server_session.process(A, salt)
-assert server_session.verify_proof(M)
+    # Client => Server: M
+    sys.stdout.write("M: ")
+    sys.stdout.flush()
+    M = input()
 
-# Server => Client: HAMK
-print("HAMK: " + even_length_hex(server_session.key_proof_hash))
-print("K: " + even_length_hex(server_session.key))
+    # Process client public and verify session key proof.
+    server_session.process(A, salt)
+    assert server_session.verify_proof(M)
 
+    # Server => Client: HAMK
+    print("HAMK: " + even_length_hex(server_session.key_proof_hash))
+    print("K: " + even_length_hex(server_session.key))
