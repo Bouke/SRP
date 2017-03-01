@@ -54,8 +54,8 @@ class RemoteServer {
     /// - Throws: on I/O Error
     func get_challenge(A: Data) throws -> (s: Data, B: Data) {
         try write(prompt: "A", line: A.hex)
-        let s = Data(hex: try read(label: "s"))
-        let B = Data(hex: try read(label: "B"))
+        let s = try Data(hex: try read(label: "s"))
+        let B = try Data(hex: try read(label: "B"))
         return (s, B)
     }
 
@@ -67,7 +67,7 @@ class RemoteServer {
     func verify_session(M: Data) throws -> Data {
         do {
             try write(prompt: "M", line: M.hex)
-            return Data(hex: try read(label: "HAMK"))
+            return try Data(hex: try read(label: "HAMK"))
         } catch RemoteError.unexpectedExit {
             throw error()
         }
@@ -78,12 +78,11 @@ class RemoteServer {
     /// - Returns: session key
     /// - Throws: on I/O Error
     func get_session_key() throws -> Data {
-        return Data(hex: try read(label: "K"))
+        return try Data(hex: try read(label: "K"))
     }
 
     private func write(prompt expectedPrompt: String, line: String) throws {
-        let promptData = standardOutputBuffer.count > 0 ? standardOutputBuffer : standardOutput.fileHandleForReading.availableData
-        let prompt = String(data: promptData, encoding: .ascii)!
+        let prompt = readprompt()
         guard prompt == "\(expectedPrompt): " else {
             throw RemoteError.unexpectedPrompt(prompt)
         }
@@ -92,6 +91,15 @@ class RemoteServer {
 
     private func writeline(_ line: String) {
         standardInput.fileHandleForWriting.write("\(line)\n".data(using: .ascii)!)
+    }
+
+    private func readprompt() -> String {
+        if standardOutputBuffer.count > 0 {
+            defer { standardOutputBuffer = Data() }
+            return String(data: standardOutputBuffer, encoding: .ascii)!
+        } else {
+            return String(data: standardOutput.fileHandleForReading.availableData, encoding: .ascii)!
+        }
     }
 
     private func read(label: String) throws -> (String) {
@@ -106,7 +114,7 @@ class RemoteServer {
     }
 
     private func readline() throws -> String {
-        while process.isRunning {
+        repeat {
             if let eol = standardOutputBuffer.index(of: 10) {
                 defer {
                     standardOutputBuffer.removeFirst(eol + 1)
@@ -117,7 +125,7 @@ class RemoteServer {
                 return line
             }
             standardOutputBuffer.append(standardOutput.fileHandleForReading.availableData)
-        }
+        } while process.isRunning
         throw RemoteError.unexpectedExit
     }
 
@@ -131,7 +139,7 @@ class RemoteServer {
 }
 
 class PySRPTests: XCTestCase {
-    func testPySRPServer() {
+    func testSrptoolsServer() {
         do {
             let server = try RemoteServer(username: "bouke", password: "test")
             let client = Client(username: "bouke", password: "test")
@@ -166,7 +174,7 @@ class PySRPTests: XCTestCase {
 
     static var allTests : [(String, (PySRPTests) -> () throws -> Void)] {
         return [
-            ("testPySRPServer", testPySRPServer),
+            ("testSrptoolsServer", testSrptoolsServer),
         ]
     }
 }

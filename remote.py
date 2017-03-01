@@ -1,58 +1,55 @@
 #!/usr/bin/env python
 
 import argparse
-import binascii
 import sys
 
-import srp
+from srptools import SRPContext, SRPServerSession, constants
+from srptools.utils import value_encode
 
 parser = argparse.ArgumentParser(description="SRP Server")
-parser.add_argument("--group", default="N2048")
+parser.add_argument("--group", default="N2048")  # todo: use prime (value) instead
+parser.add_argument("--generator", default="02")  # hex
 parser.add_argument("--algorithm", default="SHA1")
 parser.add_argument("username")
 parser.add_argument("password")
 args = parser.parse_args()
 
 groups = {
-    "N2048": srp.NG_2048
-}
-algorithms = {
-    "SHA1": srp.SHA1
+    "N2048": constants.PRIME_2048
 }
 
-salt, vkey = srp.create_salted_verification_key(args.username, args.password, 
-                                                hash_alg=algorithms[args.algorithm], 
-                                                ng_type=groups[args.group])
+
+def even_length_hex(hex):
+    if len(hex) % 2 == 1:
+        hex = "0" + hex
+    return hex
+
+
+context = SRPContext(args.username, args.password, prime=groups[args.group], generator=args.generator)
+username, password_verifier, salt = context.get_user_data_triplet()
 
 # Client => Server: username, A
 sys.stdout.write("A: ")
 sys.stdout.flush()
-A = binascii.unhexlify(raw_input())
+A = input()
 
-svr = srp.Verifier(args.username, salt, vkey, A,
-                   hash_alg=algorithms[args.algorithm], 
-                   ng_type=groups[args.group])
-s, B = svr.get_challenge()
+# Receive username from client and generate server public.
+server_session = SRPServerSession(context, password_verifier)
 
 # Server => Client: s, B
-print "s: " + binascii.hexlify(s)
-print "B: " + binascii.hexlify(B)
+print("s: " + even_length_hex(salt))
+print("B: " + even_length_hex(server_session.public))
 
 # Client => Server: M
 sys.stdout.write("M: ")
 sys.stdout.flush()
-M = binascii.unhexlify(raw_input())
+M = input()
 
-# Client => Server: M
-HAMK = svr.verify_session(M)
-
-if HAMK is None:
-    print >>sys.stderr, 'error: could not verify session'
-    exit(-1)
+# Process client public and verify session key proof.
+server_session.process(A, salt)
+assert server_session.verify_proof(M)
 
 # Server => Client: HAMK
-print "HAMK: " + binascii.hexlify(HAMK)
+print("HAMK: " + even_length_hex(server_session.key_proof_hash))
+print("K: " + even_length_hex(server_session.key))
 
-# At this point the authentication process is complete.
-assert svr.authenticated()
-print "K: " + binascii.hexlify(svr.get_session_key())

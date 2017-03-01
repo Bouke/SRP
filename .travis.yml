@@ -1,3 +1,6 @@
 language: objective-c
 osx_image: xcode8.2
-script: swift test
+install:
+  - pip install srptools
+  - python remote.py -h
+script: PYTHON=`which python` swift test
