@@ -10,6 +10,7 @@ public func createSaltedVerificationKey(username: String, password: String, salt
 }
 
 func pad(_ data: Data, to size: Int) -> Data {
+    precondition(size >= data.count, "Negative padding not possible")
     return Data(count: size - data.count) + data
 }
 

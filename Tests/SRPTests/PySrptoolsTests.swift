@@ -52,11 +52,15 @@ class RemoteServer {
     /// - Parameter A:
     /// - Returns: (salt, B)
     /// - Throws: on I/O Error
-    func get_challenge(A: Data) throws -> (s: Data, B: Data) {
-        try write(prompt: "A", line: A.hex)
-        let s = try Data(hex: try read(label: "s"))
-        let B = try Data(hex: try read(label: "B"))
-        return (s, B)
+    func getChallenge(A: Data) throws -> (s: Data, B: Data) {
+        do {
+            try write(prompt: "A", line: A.hex)
+            let s = try Data(hex: try read(label: "s"))
+            let B = try Data(hex: try read(label: "B"))
+            return (s, B)
+        } catch RemoteError.unexpectedExit {
+            throw error()
+        }
     }
 
     /// Verify the user's response
@@ -64,7 +68,7 @@ class RemoteServer {
     /// - Parameter M:
     /// - Returns: HAMK
     /// - Throws: on I/O Error
-    func verify_session(M: Data) throws -> Data {
+    func verifySession(M: Data) throws -> Data {
         do {
             try write(prompt: "M", line: M.hex)
             return try Data(hex: try read(label: "HAMK"))
@@ -82,7 +86,7 @@ class RemoteServer {
     }
 
     private func write(prompt expectedPrompt: String, line: String) throws {
-        let prompt = readprompt()
+        let prompt = try readprompt()
         guard prompt == "\(expectedPrompt): " else {
             throw RemoteError.unexpectedPrompt(prompt)
         }
@@ -93,7 +97,10 @@ class RemoteServer {
         standardInput.fileHandleForWriting.write("\(line)\n".data(using: .ascii)!)
     }
 
-    private func readprompt() -> String {
+    private func readprompt() throws -> String {
+        if !process.isRunning {
+            throw RemoteError.unexpectedExit
+        }
         if standardOutputBuffer.count > 0 {
             defer { standardOutputBuffer = Data() }
             return String(data: standardOutputBuffer, encoding: .ascii)!
@@ -138,41 +145,77 @@ class RemoteServer {
     }
 }
 
-class PySRPTests: XCTestCase {
+class PySrptoolsTests: XCTestCase {
     func testSrptoolsServer() {
-        do {
-            let server = try RemoteServer(username: "bouke", password: "test")
-            let client = Client(username: "bouke", password: "test")
-
-            // The server generates the challenge: pre-defined salt, public key B
-            // Server->Client: salt, B
-            let (s, B) = try server.get_challenge(A: client.A)
-
-            // Using (salt, B), the client generates the proof M
-            // Client->Server: M
-            let M = client.processChallenge(salt: s, B: B)
-
-            // Using M, the server verifies the proof and calculates a proof for the client
-            // Server->Client: H(AMK)
-            let HAMK = try server.verify_session(M: M)
-
-            // Using H(AMK), the client verifies the server's proof
-            try client.verifySession(HAMK: HAMK)
-
-            // At this point, the client is authenticated as well
-            XCTAssert(client.isAuthenticated)
-
-            // They now share a secret session key
-            guard let K0 = try? server.get_session_key(), let K1 = client.sessionKey else {
-                return XCTFail("Session keys not set")
-            }
-            XCTAssertEqual(K0, K1, "Session keys not equal")
-        } catch {
-            XCTFail("\(error)")
-        }
+        runServerTest(group: .N1024, algorithm: .SHA1, username: "bouke", password: "test")
+        runServerTest(group: .N2048, algorithm: .SHA1, username: "bouke", password: "test")
+        runServerTest(group: .N3072, algorithm: .SHA1, username: "bouke", password: "test")
+        runServerTest(group: .N4096, algorithm: .SHA1, username: "bouke", password: "test")
+        runServerTest(group: .N6144, algorithm: .SHA1, username: "bouke", password: "test")
+        runServerTest(group: .N8192, algorithm: .SHA1, username: "bouke", password: "test")
     }
 
-    static var allTests : [(String, (PySRPTests) -> () throws -> Void)] {
+    func runServerTest(
+        group: Group,
+        algorithm: Digest,
+        username: String,
+        password: String,
+        file: StaticString = #file,
+        line: UInt = #line)
+    {
+        let server: RemoteServer
+        do {
+            server = try RemoteServer(group: group, alg: algorithm, username: username, password: password)
+        } catch {
+            return XCTFail("Could not start remote server: \(error)", file: file, line: line)
+        }
+        let client = Client(group: group, alg: algorithm, username: username, password: password)
+
+        // The server generates the challenge: pre-defined salt, public key B
+        // Server->Client: salt, B
+        let s: Data
+        let B: Data
+        do {
+            (s, B) = try server.getChallenge(A: client.A)
+        } catch {
+            return XCTFail("Server didn't return a challenge: \(error)", file: file, line: line)
+        }
+
+        // Using (salt, B), the client generates the proof M
+        // Client->Server: M
+        let M = client.processChallenge(salt: s, B: B)
+
+        // Using M, the server verifies the proof and calculates a proof for the client
+        // Server->Client: H(AMK)
+        let HAMK: Data
+        do {
+            HAMK = try server.verifySession(M: M)
+        } catch {
+            return XCTFail("Server couldn't verify the session: \(error)", file: file, line: line)
+        }
+
+        // Using H(AMK), the client verifies the server's proof
+        do {
+            try client.verifySession(HAMK: HAMK)
+        } catch {
+            return XCTFail("Client couldn't verify the session: \(error)", file: file, line: line)
+        }
+
+        // At this point, the client is authenticated as well
+        XCTAssert(client.isAuthenticated)
+
+        // They now share a secret session key
+        let serverSessionKey: Data
+        do {
+            serverSessionKey = try server.get_session_key()
+        } catch {
+            return XCTFail("Server didn't provide a session key: \(error)", file: file, line: line)
+        }
+
+        XCTAssertEqual(serverSessionKey, client.sessionKey, "Session keys not equal")
+    }
+
+    static var allTests : [(String, (PySrptoolsTests) -> () throws -> Void)] {
         return [
             ("testSrptoolsServer", testSrptoolsServer),
         ]
