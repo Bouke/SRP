@@ -94,8 +94,8 @@ if args.command == "server":
     server_session = SRPServerSession(context, password_verifier)
 
     # Server => Client: s, B
-    print("s: " + even_length_hex(salt))
-    print("B: " + even_length_hex(server_session.public))
+    print("s:", even_length_hex(salt))
+    print("B:", even_length_hex(server_session.public))
 
     # Client => Server: M
     sys.stdout.write("M: ")
@@ -107,13 +107,16 @@ if args.command == "server":
     assert server_session.verify_proof(M)
 
     # Server => Client: HAMK
-    print("HAMK: " + even_length_hex(server_session.key_proof_hash))
+    print("HAMK:", even_length_hex(server_session.key_proof_hash))
 
     # Always keep the key secret! It is printed to validate the implementation.
-    print("K: " + even_length_hex(server_session.key))
+    print("K:", even_length_hex(server_session.key))
 
 if args.command == "client":
     client_session = SRPClientSession(context)
+
+    # Client => Server: username, A
+    print("A:", even_length_hex(client_session.public))
 
     # Server => Client: s, B
     sys.stdout.write("s: ")
@@ -125,7 +128,7 @@ if args.command == "client":
     client_session.process(B, s)
 
     # Client => Server: M
-    print("M: ", even_length_hex(client_session.key_proof))
+    print("M:", even_length_hex(client_session.key_proof))
 
     # Server => Client: HAMK
     sys.stdout.write("HAMK: ")
@@ -134,4 +137,4 @@ if args.command == "client":
     assert client_session.verify_proof(HAMK)
 
     # Always keep the key secret! It is printed to validate the implementation.
-    print("K: " + even_length_hex(client_session.key))
+    print("K:", even_length_hex(client_session.key))

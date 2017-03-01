@@ -158,7 +158,7 @@ class RemoteServer: Remote {
         }
     }
 
-    /// Verify the user's response
+    /// Verify the client's response
     ///
     /// - Parameter M:
     /// - Returns: HAMK
@@ -176,7 +176,7 @@ class RemoteServer: Remote {
     ///
     /// - Returns: session key
     /// - Throws: on I/O Error
-    func get_session_key() throws -> Data {
+    func getSessionKey() throws -> Data {
         return try Data(hex: try read(label: "K"))
     }
 }
@@ -198,41 +198,42 @@ class RemoteClient: Remote {
         super.init(process: process)
     }
 
-    /// Get server's challenge
+    /// Get client's public key
     ///
-    /// - Parameter A:
-    /// - Returns: (salt, B)
+    /// - Returns: A
     /// - Throws: on I/O Error
-    func getChallenge(A: Data) throws -> (s: Data, B: Data) {
-        do {
-            try write(prompt: "A", line: A.hex)
-            let s = try Data(hex: try read(label: "s"))
-            let B = try Data(hex: try read(label: "B"))
-            return (s, B)
-        } catch RemoteError.unexpectedExit {
-            throw error()
-        }
+    func startAuthentication() throws -> Data {
+        return try Data(hex: try read(label: "A"))
     }
 
-    /// Verify the user's response
+
+    /// Process challenge, get client's response
     ///
-    /// - Parameter M:
-    /// - Returns: HAMK
+    /// - Parameters:
+    ///   - salt:
+    ///   - B:
+    /// - Returns: M
     /// - Throws: on I/O Error
-    func verifySession(M: Data) throws -> Data {
-        do {
-            try write(prompt: "M", line: M.hex)
-            return try Data(hex: try read(label: "HAMK"))
-        } catch RemoteError.unexpectedExit {
-            throw error()
-        }
+    func processChallenge(salt: Data, B: Data) throws -> Data {
+        try write(prompt: "s", line: salt.hex)
+        try write(prompt: "B", line: B.hex)
+        return try Data(hex: try read(label: "M"))
     }
 
-    /// Returns the server's session key
+    /// Verify the server's response. Be sure to call `getSessionKey`, as this call
+    /// might not fail on validation errors.
+    ///
+    /// - Parameter serverHAMK:
+    /// - Throws: on I/O Error
+    func verifySession(HAMK serverHAMK: Data) throws {
+        try write(prompt: "HAMK", line: serverHAMK.hex)
+    }
+
+    /// Returns the client's session key
     ///
     /// - Returns: session key
     /// - Throws: on I/O Error
-    func get_session_key() throws -> Data {
+    func getSessionKey() throws -> Data {
         return try Data(hex: try read(label: "K"))
     }
 }
