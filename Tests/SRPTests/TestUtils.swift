@@ -22,6 +22,12 @@ extension Data {
     }
 }
 
+let remotepy = URL(fileURLWithPath: #file)
+    .deletingLastPathComponent()
+    .deletingLastPathComponent()
+    .deletingLastPathComponent()
+    .appendingPathComponent("remote.py")
+
 enum RemoteError: Error {
     case noPython
     case unexpectedPrompt(String)
@@ -129,6 +135,62 @@ class RemoteServer: Remote {
         process.launchPath = python
         process.arguments = [remotepy.path,
                              "server",
+                             username,
+                             password,
+                             "--group", "\(group)",
+                             "--algorithm", "\(alg)"]
+        super.init(process: process)
+    }
+
+    /// Get server's challenge
+    ///
+    /// - Parameter A:
+    /// - Returns: (salt, B)
+    /// - Throws: on I/O Error
+    func getChallenge(A: Data) throws -> (s: Data, B: Data) {
+        do {
+            try write(prompt: "A", line: A.hex)
+            let s = try Data(hex: try read(label: "s"))
+            let B = try Data(hex: try read(label: "B"))
+            return (s, B)
+        } catch RemoteError.unexpectedExit {
+            throw error()
+        }
+    }
+
+    /// Verify the user's response
+    ///
+    /// - Parameter M:
+    /// - Returns: HAMK
+    /// - Throws: on I/O Error
+    func verifySession(M: Data) throws -> Data {
+        do {
+            try write(prompt: "M", line: M.hex)
+            return try Data(hex: try read(label: "HAMK"))
+        } catch RemoteError.unexpectedExit {
+            throw error()
+        }
+    }
+
+    /// Returns the server's session key
+    ///
+    /// - Returns: session key
+    /// - Throws: on I/O Error
+    func get_session_key() throws -> Data {
+        return try Data(hex: try read(label: "K"))
+    }
+}
+
+class RemoteClient: Remote {
+    init(group: Group = .N2048, alg: Digest = .SHA1, username: String, password: String) throws {
+        guard let python = ProcessInfo.processInfo.environment["PYTHON"] else {
+            throw RemoteError.noPython
+        }
+
+        let process = Process()
+        process.launchPath = python
+        process.arguments = [remotepy.path,
+                             "client",
                              username,
                              password,
                              "--group", "\(group)",

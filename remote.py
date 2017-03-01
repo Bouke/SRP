@@ -3,6 +3,7 @@
 import argparse
 import sys
 
+from srptools import SRPClientSession
 from srptools import SRPContext, SRPServerSession, constants
 from srptools.utils import hex_from
 
@@ -69,6 +70,7 @@ parser.add_argument("--algorithm", default="SHA1")
 subparsers = parser.add_subparsers(dest="command")
 subparsers.is_required = True
 subparsers.add_parser("server")
+subparsers.add_parser("client")
 
 parser.add_argument("username")
 parser.add_argument("password")
@@ -106,4 +108,30 @@ if args.command == "server":
 
     # Server => Client: HAMK
     print("HAMK: " + even_length_hex(server_session.key_proof_hash))
+
+    # Always keep the key secret! It is printed to validate the implementation.
     print("K: " + even_length_hex(server_session.key))
+
+if args.command == "client":
+    client_session = SRPClientSession(context)
+
+    # Server => Client: s, B
+    sys.stdout.write("s: ")
+    sys.stdout.flush()
+    s = input()
+    sys.stdout.write("B: ")
+    sys.stdout.flush()
+    B = input()
+    client_session.process(B, s)
+
+    # Client => Server: M
+    print("M: ", even_length_hex(client_session.key_proof))
+
+    # Server => Client: HAMK
+    sys.stdout.write("HAMK: ")
+    sys.stdout.flush()
+    HAMK = input()
+    assert client_session.verify_proof(HAMK)
+
+    # Always keep the key secret! It is printed to validate the implementation.
+    print("K: " + even_length_hex(client_session.key))
