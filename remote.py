@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import print_function
 
 import argparse
 import sys
@@ -6,6 +7,12 @@ import sys
 from srptools import SRPClientSession
 from srptools import SRPContext, SRPServerSession, constants
 from srptools.utils import hex_from
+
+# Support Python 2 and 3
+try: 
+    input = raw_input
+except NameError: 
+    pass
 
 
 def even_length_hex(hex):
