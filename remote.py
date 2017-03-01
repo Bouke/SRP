@@ -70,9 +70,14 @@ groups = {
     "N8192": (PRIME_8192, PRIME_8192_GEN),
 }
 
+algorithms = {
+    "sha1": constants.HASH_SHA_1,
+    "sha256": constants.HASH_SHA_256,
+}
+
 parser = argparse.ArgumentParser(description="SRP Server")
 parser.add_argument("--group", default="N2048")
-parser.add_argument("--algorithm", default="SHA1")
+parser.add_argument("--algorithm", default="sha1")
 
 subparsers = parser.add_subparsers(dest="command")
 subparsers.is_required = True
@@ -84,10 +89,10 @@ parser.add_argument("password")
 
 args = parser.parse_args()
 
-assert args.algorithm == "sha1", "Only SHA1 is supported"
 prime = groups[args.group][0]
 generator = groups[args.group][1]
-context = SRPContext(args.username, args.password, prime=prime, generator=generator)
+hash_func = algorithms[args.algorithm]
+context = SRPContext(args.username, args.password, prime=prime, generator=generator, hash_func=hash_func)
 
 if args.command == "server":
     _, password_verifier, salt = context.get_user_data_triplet()

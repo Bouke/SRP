@@ -11,7 +11,14 @@ class PySrptoolsTests: XCTestCase {
         runClientTest(group: .N4096, algorithm: .sha1, username: "bouke", password: "test")
         runClientTest(group: .N6144, algorithm: .sha1, username: "bouke", password: "test")
         runClientTest(group: .N8192, algorithm: .sha1, username: "bouke", password: "test")
-    }
+
+        runClientTest(group: .N1024, algorithm: .sha256, username: "bouke", password: "test")
+        runClientTest(group: .N2048, algorithm: .sha256, username: "bouke", password: "test")
+        runClientTest(group: .N3072, algorithm: .sha256, username: "bouke", password: "test")
+        runClientTest(group: .N4096, algorithm: .sha256, username: "bouke", password: "test")
+        runClientTest(group: .N6144, algorithm: .sha256, username: "bouke", password: "test")
+        runClientTest(group: .N8192, algorithm: .sha256, username: "bouke", password: "test")
+}
 
     func runClientTest(
         group: Group,
@@ -80,6 +87,13 @@ class PySrptoolsTests: XCTestCase {
         runServerTest(group: .N4096, algorithm: .sha1, username: "bouke", password: "test")
         runServerTest(group: .N6144, algorithm: .sha1, username: "bouke", password: "test")
         runServerTest(group: .N8192, algorithm: .sha1, username: "bouke", password: "test")
+
+        runServerTest(group: .N1024, algorithm: .sha256, username: "bouke", password: "test")
+        runServerTest(group: .N2048, algorithm: .sha256, username: "bouke", password: "test")
+        runServerTest(group: .N3072, algorithm: .sha256, username: "bouke", password: "test")
+        runServerTest(group: .N4096, algorithm: .sha256, username: "bouke", password: "test")
+        runServerTest(group: .N6144, algorithm: .sha256, username: "bouke", password: "test")
+        runServerTest(group: .N8192, algorithm: .sha256, username: "bouke", password: "test")
     }
 
     func runServerTest(
