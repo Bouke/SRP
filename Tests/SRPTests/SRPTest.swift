@@ -38,7 +38,7 @@ class SRPTests: XCTestCase {
         do {
             // Using M, the server verifies the proof and calculates a proof for the client
             // Server->Client: H(AMK)
-            HAMK = try server.verifySession(A: client.A, M: M)
+            HAMK = try server.verifySession(A: A, M: M)
         } catch SRPError.authenticationFailed {
             return XCTFail("Client generated invalid M")
         }
