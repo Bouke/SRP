@@ -3,4 +3,5 @@ import XCTest
 
 XCTMain([
      testCase(SRPTests.allTests),
+     testCase(PySrptoolsTests.allTests),
 ])
