@@ -42,7 +42,7 @@ class PySrptoolsTests: XCTestCase {
         let s: Data
         let B: Data
         do {
-            (s, B) = try server.getChallenge(A: client.A)
+            (s, B) = try server.getChallenge(A: client.publicKey)
         } catch {
             return XCTFail("Server didn't return a challenge: \(error)", file: file, line: line)
         }
