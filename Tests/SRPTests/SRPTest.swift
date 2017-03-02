@@ -1,5 +1,6 @@
-import XCTest
+import Foundation
 import Cryptor
+import XCTest
 
 @testable import SRP
 
