@@ -102,7 +102,7 @@ public class Client {
         return a.serialize()
     }
 
-    /// The session key that is exchanged during authentication.
+    /// The session key (K) that is exchanged during authentication.
     /// This key can be used to encrypt further communication
     /// between client and server.
     public var sessionKey: Data? {
