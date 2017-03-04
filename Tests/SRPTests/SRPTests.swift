@@ -5,23 +5,50 @@ import XCTest
 
 class SRPTests: XCTestCase {
     func testSuccess() {
-        let username = "Pair-Setup"
-        let password = "001-02-003"
+        runTest(group: .N1024, algorithm: .sha1, username: "alice", password: "password123")
+        runTest(group: .N2048, algorithm: .sha1, username: "alice", password: "password123")
+        runTest(group: .N3072, algorithm: .sha1, username: "alice", password: "password123")
+        runTest(group: .N4096, algorithm: .sha1, username: "alice", password: "password123")
+        runTest(group: .N6144, algorithm: .sha1, username: "alice", password: "password123")
+        runTest(group: .N8192, algorithm: .sha1, username: "alice", password: "password123")
+
+        runTest(group: .N1024, algorithm: .sha256, username: "alice", password: "password123")
+        runTest(group: .N2048, algorithm: .sha256, username: "alice", password: "password123")
+        runTest(group: .N3072, algorithm: .sha256, username: "alice", password: "password123")
+        runTest(group: .N4096, algorithm: .sha256, username: "alice", password: "password123")
+        runTest(group: .N6144, algorithm: .sha256, username: "alice", password: "password123")
+        runTest(group: .N8192, algorithm: .sha256, username: "alice", password: "password123")
+    }
+
+    func testCustomGroupParameters() {
+        let group = Group(hexPrime: "13", hexGenerator: "7")!
+        runTest(group: group, algorithm: .sha1, username: "alice", password: "password123")
+        runTest(group: group, algorithm: .sha256, username: "alice", password: "password123")
+    }
+
+    func runTest(
+        group: Group,
+        algorithm: Digest.Algorithm,
+        username: String,
+        password: String,
+        file: StaticString = #file,
+        line: UInt = #line)
+    {
 
         /* Create a salt+verification key for the user's password. The salt and
          * key need to be computed at the time the user's password is set and
          * must be stored by the server-side application for use during the
          * authentication process.
          */
-        let (salt, verificationKey) = createSaltedVerificationKey(username: username, password: password)
+        let (salt, verificationKey) = createSaltedVerificationKey(username: username, password: password, group: group, algorithm: algorithm)
 
         // Begin authentication process
-        let client = Client(username: username, password: password)
+        let client = Client(username: username, password: password, group: group, algorithm: algorithm)
         let (_, A) = client.startAuthentication()
 
         // Client->Server: I (username)
         // Server retrieves salt and verificationKey from permanent storage
-        let server = Server(username: username, salt: salt, verificationKey: verificationKey, secret: Data(bytes: try! Random.generate(byteCount: 32)))
+        let server = Server(username: username, salt: salt, verificationKey: verificationKey, group: group, algorithm: algorithm)
 
         // The server generates the challenge: pre-defined salt, public key B
         // Server->Client: salt, B
@@ -33,7 +60,7 @@ class SRPTests: XCTestCase {
         do {
             M = try client.processChallenge(salt: salt, publicKey: B)
         } catch {
-            return XCTFail("Client couldn't process challenge: \(error)")
+            return XCTFail("Client couldn't process challenge: \(error)", file: file, line: line)
         }
 
         XCTAssertFalse(server.isAuthenticated)
@@ -45,7 +72,7 @@ class SRPTests: XCTestCase {
             // Server->Client: H(AMK)
             HAMK = try server.verifySession(publicKey: A, keyProof: M)
         } catch {
-            return XCTFail("Client generated invalid M")
+            return XCTFail("Client generated invalid M", file: file, line: line)
         }
 
         // At this point, the server is authenticated.
@@ -56,7 +83,7 @@ class SRPTests: XCTestCase {
             // Using H(AMK), the client verifies the server's proof
             try client.verifySession(keyProof: HAMK)
         } catch {
-            return XCTFail("Server generated invalid H(AMK)")
+            return XCTFail("Server generated invalid H(AMK)", file: file, line: line)
         }
 
         // At this point, the client is authenticated as well
@@ -65,9 +92,9 @@ class SRPTests: XCTestCase {
 
         // They now share a secret session key
         guard let K0 = server.sessionKey, let K1 = client.sessionKey else {
-            return XCTFail("Session keys not set")
+            return XCTFail("Session keys not set", file: file, line: line)
         }
-        XCTAssertEqual(K0, K1, "Session keys not equal")
+        XCTAssertEqual(K0, K1, "Session keys not equal", file: file, line: line)
     }
 
     func testClientAborts() {

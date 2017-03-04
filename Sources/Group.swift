@@ -1,13 +1,73 @@
 import BigInt
 
+/// SRP Group Parameters
+///
+/// The 1024-, 1536-, and 2048-bit groups are taken from software
+/// developed by Tom Wu and Eugene Jhong for the Stanford SRP
+/// distribution, and subsequently proven to be prime.  The larger primes
+/// are taken from [MODP], but generators have been calculated that are
+/// primitive roots of N, unlike the generators in [MODP].
+///
+/// The values of N and g used in this protocol must be agreed upon by
+/// the two parties in question.  They can be set in advance, or the host
+/// can supply them to the client.  In the latter case, the host should
+/// send the parameters in the first message along with the salt.  For
+/// maximum security, N should be a safe prime (i.e. a number of the form
+/// N = 2q + 1, where q is also prime).  Also, g should be a generator
+/// modulo N (see [SRP] for details), which means that for any X where 0
+/// < X < N, there exists a value x for which g^x % N == X.
+///
+/// [MODP] Kivinen, T. and M. Kojo, "More Modular Exponentiation
+///        (MODP) Diffie-Hellman groups for Internet Key Exchange
+///        (IKE)", RFC 3526, May 2003.
+///
+/// [SRP]  T. Wu, "The Secure Remote Password Protocol", In
+///        Proceedings of the 1998 Internet Society Symposium on
+///        Network and Distributed Systems Security, San Diego, CA,
+///        pp. 97-111.
 public enum Group {
+    /// 1024-bits group
     case N1024
+
+    /// 2048-bits group
     case N2048
+
+    /// 1536-bits group
     case N1536
+
+    /// 3072-bits group
     case N3072
+
+    /// 4096-bits group
     case N4096
+
+    /// 6144-bits group
     case N6144
+
+    /// 8192-bits group
     case N8192
+
+    /// Custom group parameters. See `init(prime:generator:)` for more information.
+    public struct CustomGroup {
+        let N: BigUInt
+        let g: BigUInt
+    }
+
+    /// Custom group parameters. See `init(prime:generator:)` for more information.
+    case custom(CustomGroup)
+
+    /// Create custom group parameters. See the enum's documentation for
+    /// considerations on good parameters.
+    /// - Parameters:
+    ///   - prime: hex-encoded prime
+    ///   - generator: hex-encoded generator
+    /// - Returns: nil if one of the parameters chould not be decoded
+    public init?(prime: String, generator: String) {
+        guard let N = BigUInt(prime, radix: 16), let g = BigUInt(generator, radix: 16) else {
+            return nil
+        }
+        self = .custom(CustomGroup(N: N, g: g))
+    }
 
     var N: BigUInt {
         switch self {
@@ -31,13 +91,16 @@ public enum Group {
                 radix: 16)!
         case .N2048:
             return BigUInt(
-                "AC6BDB41324A9A9BF166DE5E1389582FAF72B6651987EE07FC3192943DB56050A37329CBB4" +
-                "A099ED8193E0757767A13DD52312AB4B03310DCD7F48A9DA04FD50E8083969EDB767B0CF60" +
-                "95179A163AB3661A05FBD5FAAAE82918A9962F0B93B855F97993EC975EEAA80D740ADBF4FF" +
-                "747359D041D5C33EA71D281E446B14773BCA97B43A23FB801676BD207A436C6481F1D2B907" +
-                "8717461A5B9D32E688F87748544523B524B0D57D5EA77A2775D2ECFA032CFBDBF52FB37861" +
-                "60279004E57AE6AF874E7303CE53299CCC041C7BC308D82A5698F3A8D0C38271AE35F8E9DB" +
-                "FBB694B5C803D89F7AE435DE236D525F54759B65E372FCD68EF20FA7111F9E4AFF73",
+                "AC6BDB41324A9A9BF166DE5E1389582FAF72B6651987EE07FC319294" +
+                "3DB56050A37329CBB4A099ED8193E0757767A13DD52312AB4B03310D" +
+                "CD7F48A9DA04FD50E8083969EDB767B0CF6095179A163AB3661A05FB" +
+                "D5FAAAE82918A9962F0B93B855F97993EC975EEAA80D740ADBF4FF74" +
+                "7359D041D5C33EA71D281E446B14773BCA97B43A23FB801676BD207A" +
+                "436C6481F1D2B9078717461A5B9D32E688F87748544523B524B0D57D" +
+                "5EA77A2775D2ECFA032CFBDBF52FB3786160279004E57AE6AF874E73" +
+                "03CE53299CCC041C7BC308D82A5698F3A8D0C38271AE35F8E9DBFBB6" +
+                "94B5C803D89F7AE435DE236D525F54759B65E372FCD68EF20FA7111F" +
+                "9E4AFF73",
                 radix: 16)!
         case .N3072:
             return BigUInt(
@@ -149,6 +212,8 @@ public enum Group {
                 "FC026E479558E4475677E9AA9E3050E2765694DFC81F56E880B96E71" +
                 "60C980DD98EDD3DFFFFFFFFFFFFFFFFF",
                 radix: 16)!
+        case .custom(let custom):
+            return custom.N
         }
     }
 
@@ -168,6 +233,8 @@ public enum Group {
             return BigUInt(5)
         case .N8192:
             return BigUInt(19)
+        case .custom(let custom):
+            return custom.g
         }
     }
 }
