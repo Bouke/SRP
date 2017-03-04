@@ -31,38 +31,38 @@ class PySrptoolsTests: XCTestCase {
     {
         let server: RemoteServer
         do {
-            server = try RemoteServer(group: group, algorithm: algorithm, username: username, password: password)
+            server = try RemoteServer(username: username, password: password, group: group, algorithm: algorithm)
         } catch {
             return XCTFail("Could not start remote server: \(error)", file: file, line: line)
         }
-        let client = Client(group: group, algorithm: algorithm, username: username, password: password)
+        let client = Client(username: username, password: password, group: group, algorithm: algorithm)
 
         // The server generates the challenge: pre-defined salt, public key B
         // Server->Client: salt, B
         let s: Data
         let B: Data
         do {
-            (s, B) = try server.getChallenge(A: client.publicKey)
+            (s, B) = try server.getChallenge(publicKey: client.publicKey)
         } catch {
             return XCTFail("Server didn't return a challenge: \(error)", file: file, line: line)
         }
 
         // Using (salt, B), the client generates the proof M
         // Client->Server: M
-        let M = client.processChallenge(salt: s, B: B)
+        let M = client.processChallenge(salt: s, publicKey: B)
 
         // Using M, the server verifies the proof and calculates a proof for the client
         // Server->Client: H(AMK)
         let HAMK: Data
         do {
-            HAMK = try server.verifySession(M: M)
+            HAMK = try server.verifySession(keyProof: M)
         } catch {
             return XCTFail("Server couldn't verify the session: \(error)", file: file, line: line)
         }
 
         // Using H(AMK), the client verifies the server's proof
         do {
-            try client.verifySession(HAMK: HAMK)
+            try client.verifySession(keyProof: HAMK)
         } catch {
             return XCTFail("Client couldn't verify the session: \(error)", file: file, line: line)
         }
@@ -106,18 +106,18 @@ class PySrptoolsTests: XCTestCase {
         line: UInt = #line)
     {
         let (salt, verificationKey) = createSaltedVerificationKey(username: username, password: password, group: group, algorithm: algorithm)
-        let server = Server(group: group, algorithm: algorithm, salt: salt, username: username, verificationKey: verificationKey)
+        let server = Server(username: username, salt: salt, verificationKey: verificationKey, group: group, algorithm: algorithm)
 
         let client: RemoteClient
         do {
-            client = try RemoteClient(group: group, algorithm: algorithm, username: username, password: password)
+            client = try RemoteClient(username: username, password: password, group: group, algorithm: algorithm)
         } catch {
             return XCTFail("Could not start remote client: \(error)", file: file, line: line)
         }
 
         let A: Data
         do {
-            A = try client.startAuthentication()
+            (_, A) = try client.startAuthentication()
         } catch {
             return XCTFail("Client didn't return public key: \(error)", file: file, line: line)
         }
@@ -130,7 +130,7 @@ class PySrptoolsTests: XCTestCase {
         // Client->Server: M
         let M: Data
         do {
-            M = try client.processChallenge(salt: s, B: B)
+            M = try client.processChallenge(salt: s, publicKey: B)
         } catch {
             return XCTFail("Client couldn't process challenge: \(error)", file: file, line: line)
         }
@@ -139,7 +139,7 @@ class PySrptoolsTests: XCTestCase {
         // Server->Client: H(AMK)
         let HAMK: Data
         do {
-            HAMK = try server.verifySession(A: A, M: M)
+            HAMK = try server.verifySession(publicKey: A, keyProof: M)
         } catch {
             return XCTFail("Server couldn't verify the session: \(error)", file: file, line: line)
         }
@@ -149,7 +149,7 @@ class PySrptoolsTests: XCTestCase {
 
         // Using H(AMK), the client verifies the server's proof
         do {
-            try client.verifySession(HAMK: HAMK)
+            try client.verifySession(keyProof: HAMK)
         } catch {
             return XCTFail("Client couldn't verify the session: \(error)", file: file, line: line)
         }

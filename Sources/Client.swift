@@ -2,6 +2,8 @@ import Foundation
 import BigInt
 import Cryptor
 
+/// SRP Client; the party that initializes the authentication and
+/// must proof possession of the correct password.
 public class Client {
     let a: BigUInt
     let A: BigUInt
@@ -21,11 +23,22 @@ public class Client {
     /// is also available.
     public private(set) var isAuthenticated = false
 
+    /// Initialize the Client SRP party.
+    ///
+    /// - Parameters:
+    ///   - username: user's username.
+    ///   - password: user's password.
+    ///   - group: which `Group` to use, must be the same for the
+    ///       server as well as the pre-stored verificationKey.
+    ///   - algorithm: which `Digest.Algorithm` to use, again this
+    ///       must be the same for the server as well as the pre-stored 
+    ///       verificationKey.
+    ///   - secret: client's private key (must not be re-used).
     public init(
-        group: Group = .N2048,
-        algorithm: Digest.Algorithm = .sha1,
         username: String,
         password: String,
+        group: Group = .N2048,
+        algorithm: Digest.Algorithm = .sha1,
         secret: Data? = nil)
     {
         self.group = group
@@ -42,33 +55,45 @@ public class Client {
         A = group.g.power(a, modulus: group.N)
     }
 
+    /// Starts authentication. This method is a no-op.
+    ///
+    /// - Returns: `username` (I) and `publicKey` (A)
     public func startAuthentication() -> (username: String, publicKey: Data) {
         return (username, publicKey)
     }
 
-    public func processChallenge(salt: Data, B: Data) -> Data {
+    /// Process the challenge provided by the server. This sets the `sessionKey`
+    /// and generates proof that it generated the correct key from the password
+    /// and the challenge. After the server has also proven the validity of their
+    /// key, the `sessionKey` can be used.
+    ///
+    /// - Parameters:
+    ///   - salt: user-specific salt (s)
+    ///   - publicKey: server's public key (B)
+    /// - Returns: key proof (M)
+    public func processChallenge(salt: Data, publicKey serverPublicKey: Data) -> Data {
         let H = Digest.hasher(algorithm)
         let N = group.N
 
-        let u = calculate_u(group: group, algorithm: algorithm, A: publicKey, B: B)
+        let u = calculate_u(group: group, algorithm: algorithm, A: publicKey, B: serverPublicKey)
         let k = calculate_k(group: group, algorithm: algorithm)
         let x = calculate_x(algorithm: algorithm, salt: salt, username: username, password: password)
         let v = calculate_v(group: group, x: x)
 
-        let B_ = BigUInt(B)
+        let B = BigUInt(serverPublicKey)
 
         // shared secret
         // S = (B - kg^x) ^ (a + ux)
         // Note that v = g^x, and that B - kg^x might become negative, which 
         // cannot be stored in BigUInt. So we'll add N to B_ and make sure kv
         // isn't greater than N.
-        let S = (B_ + N - k * v % N).power(a + u * x, modulus: N)
+        let S = (B + N - k * v % N).power(a + u * x, modulus: N)
 
         // session key
         K = H(S.serialize())
 
         // client verification
-        let M = calculate_M(group: group, algorithm: algorithm, username: username, salt: salt, A: publicKey, B: B, K: K!)
+        let M = calculate_M(group: group, algorithm: algorithm, username: username, salt: salt, A: publicKey, B: serverPublicKey, K: K!)
 
         // server verification
         HAMK = calculate_HAMK(algorithm: algorithm, A: publicKey, M: M, K: K!)
@@ -84,9 +109,9 @@ public class Client {
     ///     session key.
     /// - Throws: `SRPError.authenticationFailed` if the proof couldn't
     ///     be verified.
-    public func verifySession(HAMK serverHAMK: Data) throws {
+    public func verifySession(keyProof serverKeyProof: Data) throws {
         guard let HAMK = HAMK else { throw SRPError.authenticationFailed }
-        guard HAMK == serverHAMK else { throw SRPError.authenticationFailed }
+        guard HAMK == serverKeyProof else { throw SRPError.authenticationFailed }
         isAuthenticated = true
     }
 

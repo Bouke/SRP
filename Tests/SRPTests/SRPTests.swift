@@ -22,7 +22,7 @@ class SRPTests: XCTestCase {
 
         // Client->Server: I (username)
         // Server retrieves salt and verificationKey from permanent storage
-        let server = Server(salt: salt, username: username, verificationKey: verificationKey, secret: Data(bytes: try! Random.generate(byteCount: 32)))
+        let server = Server(username: username, salt: salt, verificationKey: verificationKey, secret: Data(bytes: try! Random.generate(byteCount: 32)))
 
         // The server generates the challenge: pre-defined salt, public key B
         // Server->Client: salt, B
@@ -30,7 +30,7 @@ class SRPTests: XCTestCase {
 
         // Using (salt, B), the client generates the proof M
         // Client->Server: M
-        let M = client.processChallenge(salt: salt, B: B)
+        let M = client.processChallenge(salt: salt, publicKey: B)
 
         XCTAssertFalse(server.isAuthenticated)
         XCTAssertFalse(client.isAuthenticated)
@@ -39,7 +39,7 @@ class SRPTests: XCTestCase {
         do {
             // Using M, the server verifies the proof and calculates a proof for the client
             // Server->Client: H(AMK)
-            HAMK = try server.verifySession(A: A, M: M)
+            HAMK = try server.verifySession(publicKey: A, keyProof: M)
         } catch SRPError.authenticationFailed {
             return XCTFail("Client generated invalid M")
         }
@@ -50,7 +50,7 @@ class SRPTests: XCTestCase {
 
         do {
             // Using H(AMK), the client verifies the server's proof
-            try client.verifySession(HAMK: HAMK)
+            try client.verifySession(keyProof: HAMK)
         } catch SRPError.authenticationFailed {
             return XCTFail("Server generated invalid H(AMK)")
         }

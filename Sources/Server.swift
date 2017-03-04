@@ -2,12 +2,14 @@ import Foundation
 import BigInt
 import Cryptor
 
+/// SRP Server; party that verifies the Client's challenge/response 
+/// against the known password verifier stored for a user.
 public class Server {
     let b: BigUInt
     let B: BigUInt
 
-    public let salt: Data
-    public let username: String
+    let salt: Data
+    let username: String
 
     let v: BigUInt
     var K: Data? = nil
@@ -15,9 +17,36 @@ public class Server {
     let group: Group
     let algorithm: Digest.Algorithm
 
+    /// Whether the session is authenticated, i.e. the password
+    /// was verified by the server and proof of a valid session
+    /// key was provided by the server. If `true`, `sessionKey`
+    /// is also available.
     public private(set) var isAuthenticated = false
 
-    public init (group: Group = .N2048, algorithm: Digest.Algorithm = .sha1, salt: Data, username: String, verificationKey: Data, secret: Data? = nil) {
+    /// Initialize the Server SRP party. The username is provided
+    /// by the Client. The salt and verificationKey have been 
+    /// stored prior to the authentication attempt.
+    ///
+    /// - Parameters:
+    ///   - username: username (I) provided by the client.
+    ///   - salt: salt (s) stored for this username.
+    ///   - verificationKey: verification key (v) stored for this
+    ///       username.
+    ///   - group: which `Group` to use, must be the same for the
+    ///       client as well as the pre-stored verificationKey.
+    ///   - algorithm: which `Digest.Algorithm` to use, again this
+    ///       must be the same for the client as well as the pre-stored
+    ///       verificationKey.
+    ///   - secret: server's private key, when running multiple 
+    ///       instances the private key should be shared.
+    public init(
+        username: String,
+        salt: Data,
+        verificationKey: Data,
+        group: Group = .N2048,
+        algorithm: Digest.Algorithm = .sha1,
+        secret: Data? = nil)
+    {
         self.group = group
         self.algorithm = algorithm
         self.salt = salt
@@ -36,28 +65,43 @@ public class Server {
         B = ((k * v + g.power(b, modulus: N)) % N)
     }
 
+    /// Returns the challenge. This method is a no-op.
+    ///
+    /// - Returns: `salt` (s) and `publicKey` (B)
     public func getChallenge() -> (salt: Data, publicKey: Data) {
         return (salt, publicKey)
     }
 
-    public func verifySession(A: Data, M clientM: Data) throws -> Data {
-        let u = calculate_u(group: group, algorithm: algorithm, A: A, B: publicKey)
-        let A_ = BigUInt(A)
+    /// Verify that the client did generate the correct `sessionKey`
+    /// from their password and the challenge we provided. We'll generate
+    /// the `sessionKey` as well and proof the client we have posession
+    /// of the password verifier and thus generated the same `sessionKey`
+    /// from that.
+    ///
+    /// - Parameters:
+    ///   - clientPublicKey: client's public key
+    ///   - clientKeyProof: client's proof of `sessionKey`
+    /// - Returns: our proof of `sessionKey` (H(A|M|K))
+    /// - Throws: `SRPError.authenticationFailed` if the proof couldn't
+    ///     be verified.
+    public func verifySession(publicKey clientPublicKey: Data, keyProof clientKeyProof: Data) throws -> Data {
+        let u = calculate_u(group: group, algorithm: algorithm, A: clientPublicKey, B: publicKey)
+        let A = BigUInt(clientPublicKey)
         let N = group.N
 
         // shared secret
         // S = (Av^u) mod N
-        let S = (A_ * v.power(u, modulus: N)).power(b, modulus: N)
+        let S = (A * v.power(u, modulus: N)).power(b, modulus: N)
 
         let H = Digest.hasher(algorithm)
         // K = H(S)
         K = H(S.serialize())
 
-        let M = calculate_M(group: group, algorithm: algorithm, username: username, salt: salt, A: A, B: publicKey, K: sessionKey!)
-        guard clientM == M else { throw SRPError.authenticationFailed }
+        let M = calculate_M(group: group, algorithm: algorithm, username: username, salt: salt, A: clientPublicKey, B: publicKey, K: K!)
+        guard clientKeyProof == M else { throw SRPError.authenticationFailed }
         isAuthenticated = true
 
-        return calculate_HAMK(algorithm: algorithm, A: A, M: M, K: K!)
+        return calculate_HAMK(algorithm: algorithm, A: clientPublicKey, M: M, K: sessionKey!)
     }
 
     /// The server's public key (A). For every authentication
