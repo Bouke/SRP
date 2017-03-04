@@ -49,7 +49,12 @@ class PySrptoolsTests: XCTestCase {
 
         // Using (salt, B), the client generates the proof M
         // Client->Server: M
-        let M = client.processChallenge(salt: s, publicKey: B)
+        let M: Data
+        do {
+            M = try client.processChallenge(salt: s, publicKey: B)
+        } catch {
+            return XCTFail("Client couldn't process challenge: \(error)")
+        }
 
         // Using M, the server verifies the proof and calculates a proof for the client
         // Server->Client: H(AMK)

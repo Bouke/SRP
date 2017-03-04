@@ -25,7 +25,7 @@ class ReadmeTests: XCTestCase {
 
         // Alice generates a sessionKey and proofs she generated the correct
         // session key based on her password and the challenge.
-        let clientKeyProof = client.processChallenge(salt: salt, publicKey: serverPublicKey)
+        let clientKeyProof = try client.processChallenge(salt: salt, publicKey: serverPublicKey)
 
         // The server verifies Alices' proof and generates their proof.
         let serverKeyProof = try server.verifySession(publicKey: clientPublicKey, keyProof: clientKeyProof)

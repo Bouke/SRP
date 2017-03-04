@@ -71,16 +71,23 @@ public class Client {
     ///   - salt: user-specific salt (s)
     ///   - publicKey: server's public key (B)
     /// - Returns: key proof (M)
-    public func processChallenge(salt: Data, publicKey serverPublicKey: Data) -> Data {
+    /// - Throws:
+    ///     * `AuthenticationFailure.invalidPublicKey` if the server's public 
+    ///       key is invalid (i.e. B % N is zero).
+    public func processChallenge(salt: Data, publicKey serverPublicKey: Data) throws -> Data {
         let H = Digest.hasher(algorithm)
         let N = group.N
+
+        let B = BigUInt(serverPublicKey)
+
+        guard B % N != 0 else {
+            throw AuthenticationFailure.invalidPublicKey
+        }
 
         let u = calculate_u(group: group, algorithm: algorithm, A: publicKey, B: serverPublicKey)
         let k = calculate_k(group: group, algorithm: algorithm)
         let x = calculate_x(algorithm: algorithm, salt: salt, username: username, password: password)
         let v = calculate_v(group: group, x: x)
-
-        let B = BigUInt(serverPublicKey)
 
         // shared secret
         // S = (B - kg^x) ^ (a + ux)
@@ -107,11 +114,18 @@ public class Client {
     ///
     /// - Parameter HAMK: proof of the server that it derived the same
     ///     session key.
-    /// - Throws: `SRPError.authenticationFailed` if the proof couldn't
-    ///     be verified.
+    /// - Throws: 
+    ///    * `AuthenticationFailure.missingChallenge` if this method
+    ///      is called before calling `processChallenge`.
+    ///    * `AuthenticationFailure.keyProofMismatch` if the proof 
+    ///      doesn't match our own.
     public func verifySession(keyProof serverKeyProof: Data) throws {
-        guard let HAMK = HAMK else { throw SRPError.authenticationFailed }
-        guard HAMK == serverKeyProof else { throw SRPError.authenticationFailed }
+        guard let HAMK = HAMK else {
+            throw AuthenticationFailure.missingChallenge
+        }
+        guard HAMK == serverKeyProof else {
+            throw AuthenticationFailure.keyProofMismatch
+        }
         isAuthenticated = true
     }
 

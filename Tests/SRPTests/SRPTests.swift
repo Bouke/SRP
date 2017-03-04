@@ -1,11 +1,10 @@
 import Foundation
 import Cryptor
+import SRP
 import XCTest
 
-@testable import SRP
-
 class SRPTests: XCTestCase {
-    func test() throws {
+    func testSuccess() {
         let username = "Pair-Setup"
         let password = "001-02-003"
 
@@ -30,7 +29,12 @@ class SRPTests: XCTestCase {
 
         // Using (salt, B), the client generates the proof M
         // Client->Server: M
-        let M = client.processChallenge(salt: salt, publicKey: B)
+        let M: Data
+        do {
+            M = try client.processChallenge(salt: salt, publicKey: B)
+        } catch {
+            return XCTFail("Client couldn't process challenge: \(error)")
+        }
 
         XCTAssertFalse(server.isAuthenticated)
         XCTAssertFalse(client.isAuthenticated)
@@ -40,7 +44,7 @@ class SRPTests: XCTestCase {
             // Using M, the server verifies the proof and calculates a proof for the client
             // Server->Client: H(AMK)
             HAMK = try server.verifySession(publicKey: A, keyProof: M)
-        } catch SRPError.authenticationFailed {
+        } catch {
             return XCTFail("Client generated invalid M")
         }
 
@@ -51,7 +55,7 @@ class SRPTests: XCTestCase {
         do {
             // Using H(AMK), the client verifies the server's proof
             try client.verifySession(keyProof: HAMK)
-        } catch SRPError.authenticationFailed {
+        } catch {
             return XCTFail("Server generated invalid H(AMK)")
         }
 
@@ -66,9 +70,40 @@ class SRPTests: XCTestCase {
         XCTAssertEqual(K0, K1, "Session keys not equal")
     }
 
+    func testClientAborts() {
+        let client = Client(username: "alice", password: "password123")
+        do {
+            _ = try client.processChallenge(
+                salt: try! Data(hex: String(repeating: "0", count: 16)),
+                publicKey: try! Data(hex: String(repeating: "0", count: 512)))
+            XCTFail("Should not have processed the challenge")
+        } catch AuthenticationFailure.invalidPublicKey {
+            // success
+        } catch {
+            XCTFail("Incorrect error thrown: \(error)")
+        }
+    }
+
+    func testServerAborts() {
+        let (salt, verificationKey) = createSaltedVerificationKey(username: "alice", password: "password123")
+        let server = Server(username: "alice", salt: salt, verificationKey: verificationKey)
+        do {
+            _ = try server.verifySession(
+                publicKey: try! Data(hex: String(repeating: "0", count: 512)),
+                keyProof: try! Data(hex: String(repeating: "0", count: 512)))
+            XCTFail("Should not have verified the session")
+        } catch AuthenticationFailure.invalidPublicKey {
+            // success
+        } catch {
+            XCTFail("Incorrect error thrown: \(error)")
+        }
+    }
+
     static var allTests : [(String, (SRPTests) -> () throws -> Void)] {
         return [
-            ("test", test),
+            ("testSuccess", testSuccess),
+            ("testClientAborts", testClientAborts),
+            ("testServerAborts", testServerAborts),
         ]
     }
 }

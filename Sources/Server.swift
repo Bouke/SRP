@@ -82,12 +82,19 @@ public class Server {
     ///   - clientPublicKey: client's public key
     ///   - clientKeyProof: client's proof of `sessionKey`
     /// - Returns: our proof of `sessionKey` (H(A|M|K))
-    /// - Throws: `SRPError.authenticationFailed` if the proof couldn't
-    ///     be verified.
+    /// - Throws:
+    ///    * `AuthenticationFailure.invalidPublicKey` if the client's public
+    ///      key is invalid (i.e. B % N is zero).
+    ///    * `AuthenticationFailure.keyProofMismatch` if the proof
+    ///      doesn't match our own.
     public func verifySession(publicKey clientPublicKey: Data, keyProof clientKeyProof: Data) throws -> Data {
         let u = calculate_u(group: group, algorithm: algorithm, A: clientPublicKey, B: publicKey)
         let A = BigUInt(clientPublicKey)
         let N = group.N
+
+        guard A % N != 0 else {
+            throw AuthenticationFailure.invalidPublicKey
+        }
 
         // shared secret
         // S = (Av^u) mod N
@@ -98,7 +105,9 @@ public class Server {
         K = H(S.serialize())
 
         let M = calculate_M(group: group, algorithm: algorithm, username: username, salt: salt, A: clientPublicKey, B: publicKey, K: K!)
-        guard clientKeyProof == M else { throw SRPError.authenticationFailed }
+        guard clientKeyProof == M else {
+            throw AuthenticationFailure.keyProofMismatch
+        }
         isAuthenticated = true
 
         return calculate_HAMK(algorithm: algorithm, A: clientPublicKey, M: M, K: sessionKey!)
