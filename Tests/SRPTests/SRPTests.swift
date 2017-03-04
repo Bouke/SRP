@@ -21,7 +21,7 @@ class SRPTests: XCTestCase {
     }
 
     func testCustomGroupParameters() {
-        let group = Group(hexPrime: "13", hexGenerator: "7")!
+        let group = Group(prime: "13", generator: "7")!
         runTest(group: group, algorithm: .sha1, username: "alice", password: "password123")
         runTest(group: group, algorithm: .sha256, username: "alice", password: "password123")
     }
