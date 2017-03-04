@@ -8,7 +8,7 @@ class ReadmeTests: XCTestCase {
         // This is a database of users, along with their salted verification keys
         let userStore: [String: (salt: Data, verificationKey: Data)] = [
             "alice": createSaltedVerificationKey(username: "alice", password: "password123"),
-            "bob": createSaltedVerificationKey(username: "alice", password: "qwerty12345"),
+            "bob": createSaltedVerificationKey(username: "bob", password: "qwerty12345"),
         ]
 
         // Alice wants to authenticate, it sends her username to the server.
@@ -40,5 +40,12 @@ class ReadmeTests: XCTestCase {
         // Both now have the same session key. This key can be used to encrypt
         // further communication between client and server.
         assert(server.sessionKey == client.sessionKey)
+    }
+
+    static var allTests : [(String, (ReadmeTests) -> () throws -> Void)] {
+        return [
+            ("test", test),
+            ("test", test),
+        ]
     }
 }

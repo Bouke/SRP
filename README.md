@@ -11,7 +11,7 @@ SRP6 for Swift. API designed similar to the Python packages [srp][2] and [srptoo
 // This is a database of users, along with their salted verification keys
 let userStore: [String: (salt: Data, verificationKey: Data)] = [
     "alice": createSaltedVerificationKey(username: "alice", password: "password123"),
-    "bob": createSaltedVerificationKey(username: "alice", password: "qwerty12345"),
+    "bob": createSaltedVerificationKey(username: "bob", password: "qwerty12345"),
 ]
 
 // Alice wants to authenticate, it sends her username to the server.
