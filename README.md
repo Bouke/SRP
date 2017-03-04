@@ -50,6 +50,10 @@ assert(server.sessionKey == client.sessionKey)
 * [RFC 2945 - The SRP Authentication and Key Exchange System][0]
 * [RFC 5054 - Using the Secure Remote Password (SRP) Protocol for TLS Authentication][1]
 
+## Credits
+
+This library was written by [Bouke Haarsma](https://twitter.com/BoukeHaarsma).
+
 [0]: https://tools.ietf.org/html/rfc2945
 [1]: https://tools.ietf.org/html/rfc5054
 [2]: https://pypi.python.org/pypi/srp
