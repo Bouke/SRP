@@ -45,6 +45,8 @@ assert(client.isAuthenticated)
 assert(server.sessionKey == client.sessionKey)
 ```
 
+More information can be found in the [documentation](http://boukehaarsma.nl/SRP).
+
 ## References
 
 * [RFC 2945 - The SRP Authentication and Key Exchange System][0]
