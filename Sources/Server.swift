@@ -83,9 +83,9 @@ public class Server {
     ///   - clientKeyProof: client's proof of `sessionKey`
     /// - Returns: our proof of `sessionKey` (H(A|M|K))
     /// - Throws:
-    ///    * `AuthenticationFailure.invalidPublicKey` if the client's public
+    ///    - `AuthenticationFailure.invalidPublicKey` if the client's public
     ///      key is invalid (i.e. B % N is zero).
-    ///    * `AuthenticationFailure.keyProofMismatch` if the proof
+    ///    - `AuthenticationFailure.keyProofMismatch` if the proof
     ///      doesn't match our own.
     public func verifySession(publicKey clientPublicKey: Data, keyProof clientKeyProof: Data) throws -> Data {
         let u = calculate_u(group: group, algorithm: algorithm, A: clientPublicKey, B: publicKey)

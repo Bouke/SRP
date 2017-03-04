@@ -2,6 +2,23 @@ import Foundation
 import BigInt
 import Cryptor
 
+
+/// Creates the salted verification key based on a user's username and
+/// password. Only the salt and verification key need to be stored on the
+/// server, there's no need to keep the plain-text password. 
+///
+/// Keep the verification key private, as it can be used to brute-force 
+/// the password from.
+///
+/// - Parameters:
+///   - username: user's username
+///   - password: user's password
+///   - salt: (optional) custom salt value; if providing a salt, make sure to
+///       provide a good random salt of at least 16 bytes. Default is to
+///       generate a salt of 16 bytes.
+///   - group: `Group` parameters; default is 2048-bits group.
+///   - algorithm: which `Digest.Algorithm` to use; default is SHA1.
+/// - Returns: salt (s) and verification key (v)
 public func createSaltedVerificationKey(
     username: String,
     password: String,

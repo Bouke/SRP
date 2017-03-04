@@ -71,9 +71,8 @@ public class Client {
     ///   - salt: user-specific salt (s)
     ///   - publicKey: server's public key (B)
     /// - Returns: key proof (M)
-    /// - Throws:
-    ///     * `AuthenticationFailure.invalidPublicKey` if the server's public 
-    ///       key is invalid (i.e. B % N is zero).
+    /// - Throws: `AuthenticationFailure.invalidPublicKey` if the server's 
+    ///     public key is invalid (i.e. B % N is zero).
     public func processChallenge(salt: Data, publicKey serverPublicKey: Data) throws -> Data {
         let H = Digest.hasher(algorithm)
         let N = group.N
@@ -115,9 +114,9 @@ public class Client {
     /// - Parameter HAMK: proof of the server that it derived the same
     ///     session key.
     /// - Throws: 
-    ///    * `AuthenticationFailure.missingChallenge` if this method
+    ///    - `AuthenticationFailure.missingChallenge` if this method
     ///      is called before calling `processChallenge`.
-    ///    * `AuthenticationFailure.keyProofMismatch` if the proof 
+    ///    - `AuthenticationFailure.keyProofMismatch` if the proof 
     ///      doesn't match our own.
     public func verifySession(keyProof serverKeyProof: Data) throws {
         guard let HAMK = HAMK else {
