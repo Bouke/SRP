@@ -57,7 +57,7 @@ public class Server {
         guard clientM == M else { throw SRPError.authenticationFailed }
         isAuthenticated = true
 
-        return calculate_HAMK(algorithm: algorithm, A: A, M: M, K: sessionKey!)
+        return calculate_HAMK(algorithm: algorithm, A: A, M: M, K: K!)
     }
 
     /// The server's public key (A). For every authentication
