@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>SRP  Reference</title>
+    <link rel="stylesheet" type="text/css" href="css/jazzy.css" />
+    <link rel="stylesheet" type="text/css" href="css/highlight.css" />
+    <meta charset="utf-8">
+    <script src="js/jquery.min.js" defer></script>
+    <script src="js/jazzy.js" defer></script>
+    
+    <script src="js/lunr.min.js" defer></script>
+    <script src="js/typeahead.jquery.js" defer></script>
+    <script src="js/jazzy.search.js" defer></script>
+  </head>
+  <body>
+
+
+    <a title="SRP  Reference"></a>
+
+    <header class="header">
+      <p class="header-col header-col--primary">
+        <a class="header-link" href="index.html">
+          SRP Docs
+        </a>
+         (100% documented)
+      </p>
+    
+      <p class="header-col--secondary">
+        <form role="search" action="search.json">
+          <input type="text" placeholder="Search documentation" data-typeahead>
+        </form>
+      </p>
+    
+        <p class="header-col header-col--secondary">
+          <a class="header-link" href="https://github.com/Bouke/SRP">
+            <img class="header-icon" src="img/gh.png"/>
+            View on GitHub
+          </a>
+        </p>
+    
+        <p class="header-col header-col--secondary">
+          <a class="header-link" href="dash-feed://http%3A%2F%2Fboukehaarsma%2Enl%2FSRP%2FSRP%2Exml">
+            <img class="header-icon" src="img/dash.png"/>
+            Install in Dash
+          </a>
+        </p>
+    </header>
+
+    <p class="breadcrumbs">
+      <a class="breadcrumb" href="index.html">SRP Reference</a>
+      <img class="carat" src="img/carat.png" />
+      SRP  Reference
+    </p>
+
+    <div class="content-wrapper">
+      <nav class="navigation">
+        <ul class="nav-groups">
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="Classes.html">Classes</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/Client.html">Client</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/Server.html">Server</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="Enums.html">Enums</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Enums/AuthenticationFailure.html">AuthenticationFailure</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Enums/Group.html">Group</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Enums/Group.html#/s:VO3SRP5Group11CustomGroup">– CustomGroup</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="Functions.html">Functions</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Functions.html#/s:F3SRP27createSaltedVerificationKeyFT8usernameSS8passwordSS4saltGSqV10Foundation4Data_5groupOS_5Group9algorithmOC7Cryptor6Digest9Algorithm_T4saltS1_15verificationKeyS1__">createSaltedVerificationKey(username:password:salt:group:algorithm:)</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+      <article class="main-content">
+
+        <section class="section">
+          <div class="section-content">
+            
+            <a href='#secure-remote-password-srp-for-swift' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h1 id='secure-remote-password-srp-for-swift'>Secure Remote Password (SRP) for Swift</h1>
+
+<p>SRP6 for Swift. API designed similar to the Python packages <a href="https://pypi.python.org/pypi/srp">srp</a> and <a href="https://pypi.python.org/pypi/srptools">srptools</a>.</p>
+
+<p><a href="https://travis-ci.org/Bouke/SRP"><img src="https://travis-ci.org/Bouke/SRP.svg?branch=master" alt="Build Status"></a></p>
+<a href='#example-usage' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h2 id='example-usage'>Example usage</h2>
+<pre class="highlight swift"><code><span class="c1">// This is a database of users, along with their salted verification keys</span>
+<span class="k">let</span> <span class="nv">userStore</span><span class="p">:</span> <span class="p">[</span><span class="kt">String</span><span class="p">:</span> <span class="p">(</span><span class="nv">salt</span><span class="p">:</span> <span class="kt">Data</span><span class="p">,</span> <span class="nv">verificationKey</span><span class="p">:</span> <span class="kt">Data</span><span class="p">)]</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s">"alice"</span><span class="p">:</span> <span class="nf">createSaltedVerificationKey</span><span class="p">(</span><span class="nv">username</span><span class="p">:</span> <span class="s">"alice"</span><span class="p">,</span> <span class="nv">password</span><span class="p">:</span> <span class="s">"password123"</span><span class="p">),</span>
+    <span class="s">"bob"</span><span class="p">:</span> <span class="nf">createSaltedVerificationKey</span><span class="p">(</span><span class="nv">username</span><span class="p">:</span> <span class="s">"alice"</span><span class="p">,</span> <span class="nv">password</span><span class="p">:</span> <span class="s">"qwerty12345"</span><span class="p">),</span>
+<span class="p">]</span>
+
+<span class="c1">// Alice wants to authenticate, it sends her username to the server.</span>
+<span class="k">let</span> <span class="nv">client</span> <span class="o">=</span> <span class="kt">Client</span><span class="p">(</span><span class="nv">username</span><span class="p">:</span> <span class="s">"alice"</span><span class="p">,</span> <span class="nv">password</span><span class="p">:</span> <span class="s">"password123"</span><span class="p">)</span>
+<span class="nf">let</span> <span class="p">(</span><span class="n">username</span><span class="p">,</span> <span class="n">clientPublicKey</span><span class="p">)</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="nf">startAuthentication</span><span class="p">()</span>
+
+<span class="k">let</span> <span class="nv">server</span> <span class="o">=</span> <span class="kt">Server</span><span class="p">(</span>
+    <span class="nv">username</span><span class="p">:</span> <span class="n">username</span><span class="p">,</span>
+    <span class="nv">salt</span><span class="p">:</span> <span class="n">userStore</span><span class="p">[</span><span class="n">username</span><span class="p">]</span><span class="o">!.</span><span class="n">salt</span><span class="p">,</span>
+    <span class="nv">verificationKey</span><span class="p">:</span> <span class="n">userStore</span><span class="p">[</span><span class="n">username</span><span class="p">]</span><span class="o">!.</span><span class="n">verificationKey</span><span class="p">)</span>
+
+<span class="c1">// The server shares Alice's salt and its public key (the challenge).</span>
+<span class="nf">let</span> <span class="p">(</span><span class="n">salt</span><span class="p">,</span> <span class="n">serverPublicKey</span><span class="p">)</span> <span class="o">=</span> <span class="n">server</span><span class="o">.</span><span class="nf">getChallenge</span><span class="p">()</span>
+
+<span class="c1">// Alice generates a sessionKey and proofs she generated the correct</span>
+<span class="c1">// session key based on her password and the challenge.</span>
+<span class="k">let</span> <span class="nv">clientKeyProof</span> <span class="o">=</span> <span class="k">try</span> <span class="n">client</span><span class="o">.</span><span class="nf">processChallenge</span><span class="p">(</span><span class="nv">salt</span><span class="p">:</span> <span class="n">salt</span><span class="p">,</span> <span class="nv">publicKey</span><span class="p">:</span> <span class="n">serverPublicKey</span><span class="p">)</span>
+
+<span class="c1">// The server verifies Alices' proof and generates their proof.</span>
+<span class="k">let</span> <span class="nv">serverKeyProof</span> <span class="o">=</span> <span class="k">try</span> <span class="n">server</span><span class="o">.</span><span class="nf">verifySession</span><span class="p">(</span><span class="nv">publicKey</span><span class="p">:</span> <span class="n">clientPublicKey</span><span class="p">,</span> <span class="nv">keyProof</span><span class="p">:</span> <span class="n">clientKeyProof</span><span class="p">)</span>
+
+<span class="c1">// The client verifies the server's proof.</span>
+<span class="k">try</span> <span class="n">client</span><span class="o">.</span><span class="nf">verifySession</span><span class="p">(</span><span class="nv">keyProof</span><span class="p">:</span> <span class="n">serverKeyProof</span><span class="p">)</span>
+
+<span class="c1">// At this point, authentication has completed.</span>
+<span class="nf">assert</span><span class="p">(</span><span class="n">server</span><span class="o">.</span><span class="n">isAuthenticated</span><span class="p">)</span>
+<span class="nf">assert</span><span class="p">(</span><span class="n">client</span><span class="o">.</span><span class="n">isAuthenticated</span><span class="p">)</span>
+
+<span class="c1">// Both now have the same session key. This key can be used to encrypt</span>
+<span class="c1">// further communication between client and server.</span>
+<span class="nf">assert</span><span class="p">(</span><span class="n">server</span><span class="o">.</span><span class="n">sessionKey</span> <span class="o">==</span> <span class="n">client</span><span class="o">.</span><span class="n">sessionKey</span><span class="p">)</span>
+</code></pre>
+<a href='#references' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h2 id='references'>References</h2>
+
+<ul>
+<li><a href="https://tools.ietf.org/html/rfc2945">RFC 2945 - The SRP Authentication and Key Exchange System</a></li>
+<li><a href="https://tools.ietf.org/html/rfc5054">RFC 5054 - Using the Secure Remote Password (SRP) Protocol for TLS Authentication</a></li>
+</ul>
+<a href='#credits' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h2 id='credits'>Credits</h2>
+
+<p>This library was written by <a href="https://twitter.com/BoukeHaarsma">Bouke Haarsma</a>.</p>
+
+          </div>
+        </section>
+
+
+      </article>
+    </div>
+    <section class="footer">
+      <p>&copy; 2017 <a class="link" href="https://twitter.com/BoukeHaarsma" target="_blank" rel="external">Bouke Haarsma</a>. All rights reserved. (Last updated: 2017-03-04)</p>
+      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.7.4</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+    </section>
+  </body>
+</div>
+</html>

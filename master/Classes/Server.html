@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Server Class Reference</title>
+    <link rel="stylesheet" type="text/css" href="../css/jazzy.css" />
+    <link rel="stylesheet" type="text/css" href="../css/highlight.css" />
+    <meta charset="utf-8">
+    <script src="../js/jquery.min.js" defer></script>
+    <script src="../js/jazzy.js" defer></script>
+    
+    <script src="../js/lunr.min.js" defer></script>
+    <script src="../js/typeahead.jquery.js" defer></script>
+    <script src="../js/jazzy.search.js" defer></script>
+  </head>
+  <body>
+
+    <a name="//apple_ref/swift/Class/Server" class="dashAnchor"></a>
+
+    <a title="Server Class Reference"></a>
+
+    <header class="header">
+      <p class="header-col header-col--primary">
+        <a class="header-link" href="../index.html">
+          SRP Docs
+        </a>
+         (100% documented)
+      </p>
+    
+      <p class="header-col--secondary">
+        <form role="search" action="../search.json">
+          <input type="text" placeholder="Search documentation" data-typeahead>
+        </form>
+      </p>
+    
+        <p class="header-col header-col--secondary">
+          <a class="header-link" href="https://github.com/Bouke/SRP">
+            <img class="header-icon" src="../img/gh.png"/>
+            View on GitHub
+          </a>
+        </p>
+    
+        <p class="header-col header-col--secondary">
+          <a class="header-link" href="dash-feed://http%3A%2F%2Fboukehaarsma%2Enl%2FSRP%2FSRP%2Exml">
+            <img class="header-icon" src="../img/dash.png"/>
+            Install in Dash
+          </a>
+        </p>
+    </header>
+
+    <p class="breadcrumbs">
+      <a class="breadcrumb" href="../index.html">SRP Reference</a>
+      <img class="carat" src="../img/carat.png" />
+      Server Class Reference
+    </p>
+
+    <div class="content-wrapper">
+      <nav class="navigation">
+        <ul class="nav-groups">
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="../Classes.html">Classes</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/Client.html">Client</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/Server.html">Server</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="../Enums.html">Enums</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Enums/AuthenticationFailure.html">AuthenticationFailure</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Enums/Group.html">Group</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Enums/Group.html#/s:VO3SRP5Group11CustomGroup">– CustomGroup</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="../Functions.html">Functions</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Functions.html#/s:F3SRP27createSaltedVerificationKeyFT8usernameSS8passwordSS4saltGSqV10Foundation4Data_5groupOS_5Group9algorithmOC7Cryptor6Digest9Algorithm_T4saltS1_15verificationKeyS1__">createSaltedVerificationKey(username:password:salt:group:algorithm:)</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+      <article class="main-content">
+
+        <section class="section">
+          <div class="section-content">
+            <h1>Server</h1>
+              <div class="declaration">
+                <div class="language">
+                  <pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">Server</span></code></pre>
+
+                </div>
+              </div>
+            <p>SRP Server; party that verifies the Client&rsquo;s challenge/response 
+against the known password verifier stored for a user.</p>
+
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-content">
+            <div class="task-group">
+              <ul class="item-container">
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:vC3SRP6Server15isAuthenticatedSb"></a>
+                    <a name="//apple_ref/swift/Property/isAuthenticated" class="dashAnchor"></a>
+                    <a class="token" href="#/s:vC3SRP6Server15isAuthenticatedSb">isAuthenticated</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Whether the session is authenticated, i.e. the password
+was verified by the server and proof of a valid session
+key was provided by the server. If <code>true</code>, <code><a href="../Classes/Server.html#/s:vC3SRP6Server10sessionKeyGSqV10Foundation4Data_">sessionKey</a></code>
+is also available.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">private(set)</span> <span class="k">var</span> <span class="nv">isAuthenticated</span> <span class="o">=</span> <span class="kc">false</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:FC3SRP6ServercFT8usernameSS4saltV10Foundation4Data15verificationKeyS2_5groupOS_5Group9algorithmOC7Cryptor6Digest9Algorithm6secretGSqS2___S0_"></a>
+                    <a name="//apple_ref/swift/Method/init(username:salt:verificationKey:group:algorithm:secret:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:FC3SRP6ServercFT8usernameSS4saltV10Foundation4Data15verificationKeyS2_5groupOS_5Group9algorithmOC7Cryptor6Digest9Algorithm6secretGSqS2___S0_">init(username:salt:verificationKey:group:algorithm:secret:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Initialize the Server SRP party. The username is provided
+by the Client. The salt and verificationKey have been 
+stored prior to the authentication attempt.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="nf">init</span><span class="p">(</span>
+        <span class="nv">username</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span>
+        <span class="nv">salt</span><span class="p">:</span> <span class="kt">Data</span><span class="p">,</span>
+        <span class="nv">verificationKey</span><span class="p">:</span> <span class="kt">Data</span><span class="p">,</span>
+        <span class="nv">group</span><span class="p">:</span> <span class="kt"><a href="../Enums/Group.html">Group</a></span> <span class="o">=</span> <span class="o">.</span><span class="kt">N2048</span><span class="p">,</span>
+        <span class="nv">algorithm</span><span class="p">:</span> <span class="kt">Digest</span><span class="o">.</span><span class="kt">Algorithm</span> <span class="o">=</span> <span class="o">.</span><span class="n">sha1</span><span class="p">,</span>
+        <span class="nv">secret</span><span class="p">:</span> <span class="kt">Data</span><span class="p">?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>username</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>username (I) provided by the client.</p>
+
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>salt</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>salt (s) stored for this username.</p>
+
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>verificationKey</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>verification key (v) stored for this username.</p>
+
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>group</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>which <code>Group</code> to use, must be the same for the client as well as the pre-stored verificationKey.</p>
+
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>algorithm</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>which <code>Digest.Algorithm</code> to use, again this must be the same for the client as well as the pre-stored verificationKey.</p>
+
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>secret</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>server’s private key, when running multiple instances the private key should be shared.</p>
+
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:FC3SRP6Server12getChallengeFT_T4saltV10Foundation4Data9publicKeyS2__"></a>
+                    <a name="//apple_ref/swift/Method/getChallenge()" class="dashAnchor"></a>
+                    <a class="token" href="#/s:FC3SRP6Server12getChallengeFT_T4saltV10Foundation4Data9publicKeyS2__">getChallenge()</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Returns the challenge. This method is a no-op.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">getChallenge</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="p">(</span><span class="nv">salt</span><span class="p">:</span> <span class="kt">Data</span><span class="p">,</span> <span class="nv">publicKey</span><span class="p">:</span> <span class="kt">Data</span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Return Value</h4>
+                        <p><code>salt</code> (s) and <code><a href="../Classes/Server.html#/s:vC3SRP6Server9publicKeyV10Foundation4Data">publicKey</a></code> (B)</p>
+
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:FC3SRP6Server13verifySessionFzT9publicKeyV10Foundation4Data8keyProofS2__S2_"></a>
+                    <a name="//apple_ref/swift/Method/verifySession(publicKey:keyProof:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:FC3SRP6Server13verifySessionFzT9publicKeyV10Foundation4Data8keyProofS2__S2_">verifySession(publicKey:keyProof:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Verify that the client did generate the correct <code><a href="../Classes/Server.html#/s:vC3SRP6Server10sessionKeyGSqV10Foundation4Data_">sessionKey</a></code>
+from their password and the challenge we provided. We&rsquo;ll generate
+the <code><a href="../Classes/Server.html#/s:vC3SRP6Server10sessionKeyGSqV10Foundation4Data_">sessionKey</a></code> as well and proof the client we have posession
+of the password verifier and thus generated the same <code><a href="../Classes/Server.html#/s:vC3SRP6Server10sessionKeyGSqV10Foundation4Data_">sessionKey</a></code>
+from that.</p>
+
+<div class="aside aside-throws">
+    <p class="aside-title">Throws</p>
+    <ul>
+<li><code><a href="../Enums/AuthenticationFailure.html#/s:FO3SRP21AuthenticationFailure16invalidPublicKeyFMS0_S0_">AuthenticationFailure.invalidPublicKey</a></code> if the client&rsquo;s public
+key is invalid (i.e. B % N is zero).</li>
+<li><code><a href="../Enums/AuthenticationFailure.html#/s:FO3SRP21AuthenticationFailure16keyProofMismatchFMS0_S0_">AuthenticationFailure.keyProofMismatch</a></code> if the proof
+doesn&rsquo;t match our own.</li>
+</ul>
+
+</div>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">verifySession</span><span class="p">(</span><span class="n"><a href="../Classes/Server.html#/s:vC3SRP6Server9publicKeyV10Foundation4Data">publicKey</a></span> <span class="nv">clientPublicKey</span><span class="p">:</span> <span class="kt">Data</span><span class="p">,</span> <span class="n">keyProof</span> <span class="nv">clientKeyProof</span><span class="p">:</span> <span class="kt">Data</span><span class="p">)</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="kt">Data</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>clientPublicKey</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>client’s public key</p>
+
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>clientKeyProof</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>client’s proof of <code>sessionKey</code></p>
+
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                      <div>
+                        <h4>Return Value</h4>
+                        <p>our proof of <code><a href="../Classes/Server.html#/s:vC3SRP6Server10sessionKeyGSqV10Foundation4Data_">sessionKey</a></code> (H(A|M|K))</p>
+
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:vC3SRP6Server9publicKeyV10Foundation4Data"></a>
+                    <a name="//apple_ref/swift/Property/publicKey" class="dashAnchor"></a>
+                    <a class="token" href="#/s:vC3SRP6Server9publicKeyV10Foundation4Data">publicKey</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The server&rsquo;s public key (A). For every authentication
+session a new public key is generated.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">publicKey</span><span class="p">:</span> <span class="kt">Data</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:vC3SRP6Server10privateKeyV10Foundation4Data"></a>
+                    <a name="//apple_ref/swift/Property/privateKey" class="dashAnchor"></a>
+                    <a class="token" href="#/s:vC3SRP6Server10privateKeyV10Foundation4Data">privateKey</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The server&rsquo;s private key (a). For every authentication
+session a new random private key is generated.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">privateKey</span><span class="p">:</span> <span class="kt">Data</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:vC3SRP6Server10sessionKeyGSqV10Foundation4Data_"></a>
+                    <a name="//apple_ref/swift/Property/sessionKey" class="dashAnchor"></a>
+                    <a class="token" href="#/s:vC3SRP6Server10sessionKeyGSqV10Foundation4Data_">sessionKey</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The session key (K) that is exchanged during authentication.
+This key can be used to encrypt further communication
+between client and server.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">sessionKey</span><span class="p">:</span> <span class="kt">Data</span><span class="p">?</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+      </article>
+    </div>
+    <section class="footer">
+      <p>&copy; 2017 <a class="link" href="https://twitter.com/BoukeHaarsma" target="_blank" rel="external">Bouke Haarsma</a>. All rights reserved. (Last updated: 2017-03-04)</p>
+      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.7.4</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+    </section>
+  </body>
+</div>
+</html>

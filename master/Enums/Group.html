@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Group Enum Reference</title>
+    <link rel="stylesheet" type="text/css" href="../css/jazzy.css" />
+    <link rel="stylesheet" type="text/css" href="../css/highlight.css" />
+    <meta charset="utf-8">
+    <script src="../js/jquery.min.js" defer></script>
+    <script src="../js/jazzy.js" defer></script>
+    
+    <script src="../js/lunr.min.js" defer></script>
+    <script src="../js/typeahead.jquery.js" defer></script>
+    <script src="../js/jazzy.search.js" defer></script>
+  </head>
+  <body>
+
+    <a name="//apple_ref/swift/Enum/Group" class="dashAnchor"></a>
+
+    <a title="Group Enum Reference"></a>
+
+    <header class="header">
+      <p class="header-col header-col--primary">
+        <a class="header-link" href="../index.html">
+          SRP Docs
+        </a>
+         (100% documented)
+      </p>
+    
+      <p class="header-col--secondary">
+        <form role="search" action="../search.json">
+          <input type="text" placeholder="Search documentation" data-typeahead>
+        </form>
+      </p>
+    
+        <p class="header-col header-col--secondary">
+          <a class="header-link" href="https://github.com/Bouke/SRP">
+            <img class="header-icon" src="../img/gh.png"/>
+            View on GitHub
+          </a>
+        </p>
+    
+        <p class="header-col header-col--secondary">
+          <a class="header-link" href="dash-feed://http%3A%2F%2Fboukehaarsma%2Enl%2FSRP%2FSRP%2Exml">
+            <img class="header-icon" src="../img/dash.png"/>
+            Install in Dash
+          </a>
+        </p>
+    </header>
+
+    <p class="breadcrumbs">
+      <a class="breadcrumb" href="../index.html">SRP Reference</a>
+      <img class="carat" src="../img/carat.png" />
+      Group Enum Reference
+    </p>
+
+    <div class="content-wrapper">
+      <nav class="navigation">
+        <ul class="nav-groups">
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="../Classes.html">Classes</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/Client.html">Client</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/Server.html">Server</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="../Enums.html">Enums</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Enums/AuthenticationFailure.html">AuthenticationFailure</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Enums/Group.html">Group</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Enums/Group.html#/s:VO3SRP5Group11CustomGroup">– CustomGroup</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="../Functions.html">Functions</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Functions.html#/s:F3SRP27createSaltedVerificationKeyFT8usernameSS8passwordSS4saltGSqV10Foundation4Data_5groupOS_5Group9algorithmOC7Cryptor6Digest9Algorithm_T4saltS1_15verificationKeyS1__">createSaltedVerificationKey(username:password:salt:group:algorithm:)</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+      <article class="main-content">
+
+        <section class="section">
+          <div class="section-content">
+            <h1>Group</h1>
+              <div class="declaration">
+                <div class="language">
+                  <pre class="highlight"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">Group</span></code></pre>
+
+                </div>
+              </div>
+            <p>SRP Group Parameters</p>
+
+<p>The 1024-, 1536-, and 2048-bit groups are taken from software
+developed by Tom Wu and Eugene Jhong for the Stanford SRP
+distribution, and subsequently proven to be prime.  The larger primes
+are taken from [MODP], but generators have been calculated that are
+primitive roots of N, unlike the generators in [MODP].</p>
+
+<p>The values of N and g used in this protocol must be agreed upon by
+the two parties in question.  They can be set in advance, or the host
+can supply them to the client.  In the latter case, the host should
+send the parameters in the first message along with the salt.  For
+maximum security, N should be a safe prime (i.e. a number of the form
+N = 2q + 1, where q is also prime).  Also, g should be a generator
+modulo N (see [SRP] for details), which means that for any X where 0
+&lt; X &lt; N, there exists a value x for which g^x % N == X.</p>
+
+<p>[MODP] Kivinen, T. and M. Kojo, <q>More Modular Exponentiation
+       (MODP) Diffie-Hellman groups for Internet Key Exchange
+       (IKE)</q>, RFC 3526, May 2003.</p>
+
+<p>[SRP]  T. Wu, <q>The Secure Remote Password Protocol</q>, In
+       Proceedings of the 1998 Internet Society Symposium on
+       Network and Distributed Systems Security, San Diego, CA,
+       pp. 97-111.</p>
+
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-content">
+            <div class="task-group">
+              <ul class="item-container">
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:FO3SRP5Group5N1024FMS0_S0_"></a>
+                    <a name="//apple_ref/swift/Element/N1024" class="dashAnchor"></a>
+                    <a class="token" href="#/s:FO3SRP5Group5N1024FMS0_S0_">N1024</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>1024-bits group</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="k">case</span> <span class="kt">N1024</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <ul class="item-container">
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:FO3SRP5Group5N2048FMS0_S0_"></a>
+                    <a name="//apple_ref/swift/Element/N2048" class="dashAnchor"></a>
+                    <a class="token" href="#/s:FO3SRP5Group5N2048FMS0_S0_">N2048</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>2048-bits group</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="k">case</span> <span class="kt">N2048</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <ul class="item-container">
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:FO3SRP5Group5N1536FMS0_S0_"></a>
+                    <a name="//apple_ref/swift/Element/N1536" class="dashAnchor"></a>
+                    <a class="token" href="#/s:FO3SRP5Group5N1536FMS0_S0_">N1536</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>1536-bits group</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="k">case</span> <span class="kt">N1536</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <ul class="item-container">
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:FO3SRP5Group5N3072FMS0_S0_"></a>
+                    <a name="//apple_ref/swift/Element/N3072" class="dashAnchor"></a>
+                    <a class="token" href="#/s:FO3SRP5Group5N3072FMS0_S0_">N3072</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>3072-bits group</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="k">case</span> <span class="kt">N3072</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <ul class="item-container">
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:FO3SRP5Group5N4096FMS0_S0_"></a>
+                    <a name="//apple_ref/swift/Element/N4096" class="dashAnchor"></a>
+                    <a class="token" href="#/s:FO3SRP5Group5N4096FMS0_S0_">N4096</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>4096-bits group</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="k">case</span> <span class="kt">N4096</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <ul class="item-container">
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:FO3SRP5Group5N6144FMS0_S0_"></a>
+                    <a name="//apple_ref/swift/Element/N6144" class="dashAnchor"></a>
+                    <a class="token" href="#/s:FO3SRP5Group5N6144FMS0_S0_">N6144</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>6144-bits group</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="k">case</span> <span class="kt">N6144</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <ul class="item-container">
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:FO3SRP5Group5N8192FMS0_S0_"></a>
+                    <a name="//apple_ref/swift/Element/N8192" class="dashAnchor"></a>
+                    <a class="token" href="#/s:FO3SRP5Group5N8192FMS0_S0_">N8192</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>8192-bits group</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="k">case</span> <span class="kt">N8192</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <ul class="item-container">
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:VO3SRP5Group11CustomGroup"></a>
+                    <a name="//apple_ref/swift/Struct/CustomGroup" class="dashAnchor"></a>
+                    <a class="token" href="#/s:VO3SRP5Group11CustomGroup">CustomGroup</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Custom group parameters. See <code><a href="../Enums/Group.html#/s:FO3SRP5GroupcFT5primeSS9generatorSS_GSqS0__">init(prime:generator:)</a></code> for more information.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">struct</span> <span class="kt">CustomGroup</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:FO3SRP5GroupcFT5primeSS9generatorSS_GSqS0__"></a>
+                    <a name="//apple_ref/swift/Method/init(prime:generator:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:FO3SRP5GroupcFT5primeSS9generatorSS_GSqS0__">init(prime:generator:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Create custom group parameters. See the enum&rsquo;s documentation for
+considerations on good parameters.
+- Parameters:
+  - prime: hex-encoded prime
+  - generator: hex-encoded generator
+- Returns: nil if one of the parameters chould not be decoded</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="nf">init</span><span class="p">?(</span><span class="nv">prime</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">generator</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>prime</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>hex-encoded prime</p>
+
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>generator</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>hex-encoded generator</p>
+
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                      <div>
+                        <h4>Return Value</h4>
+                        <p>nil if one of the parameters chould not be decoded</p>
+
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <ul class="item-container">
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:FO3SRP5Group6customFMS0_FVS0_11CustomGroupS0_"></a>
+                    <a name="//apple_ref/swift/Element/custom" class="dashAnchor"></a>
+                    <a class="token" href="#/s:FO3SRP5Group6customFMS0_FVS0_11CustomGroupS0_">custom</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Custom group parameters. See <code><a href="../Enums/Group.html#/s:FO3SRP5GroupcFT5primeSS9generatorSS_GSqS0__">init(prime:generator:)</a></code> for more information.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="k">case</span> <span class="nf">custom</span><span class="p">(</span><span class="kt"><a href="../Enums/Group.html#/s:VO3SRP5Group11CustomGroup">CustomGroup</a></span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+      </article>
+    </div>
+    <section class="footer">
+      <p>&copy; 2017 <a class="link" href="https://twitter.com/BoukeHaarsma" target="_blank" rel="external">Bouke Haarsma</a>. All rights reserved. (Last updated: 2017-03-04)</p>
+      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.7.4</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+    </section>
+  </body>
+</div>
+</html>
