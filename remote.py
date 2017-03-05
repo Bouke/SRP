@@ -102,6 +102,8 @@ context = SRPContext(args.username, args.password, prime=prime, generator=genera
 if args.command == "server":
     _, password_verifier, salt = context.get_user_data_triplet()
 
+    print("v:", even_length_hex(password_verifier), file=sys.stderr)
+
     # Client => Server: username, A
     sys.stdout.write("A: ")
     sys.stdout.flush()
@@ -109,6 +111,8 @@ if args.command == "server":
 
     # Receive username from client and generate server public.
     server_session = SRPServerSession(context, password_verifier)
+
+    print("b:", even_length_hex(server_session.private), file=sys.stderr)
 
     # Server => Client: s, B
     print("s:", even_length_hex(salt))
@@ -127,10 +131,11 @@ if args.command == "server":
     print("HAMK:", even_length_hex(server_session.key_proof_hash))
 
     # Always keep the key secret! It is printed to validate the implementation.
-    print("K:", even_length_hex(server_session.key))
+    print("K:", even_length_hex(server_session.key), file=sys.stderr)
 
 if args.command == "client":
     client_session = SRPClientSession(context)
+    print("a:", even_length_hex(client_session.private), file=sys.stderr)
 
     # Client => Server: username, A
     print("A:", even_length_hex(client_session.public))
@@ -152,6 +157,7 @@ if args.command == "client":
     sys.stdout.flush()
     HAMK = input()
     assert client_session.verify_proof(HAMK)
+    print("OK")
 
     # Always keep the key secret! It is printed to validate the implementation.
-    print("K:", even_length_hex(client_session.key))
+    print("K:", even_length_hex(client_session.key), file=sys.stderr)

@@ -2,7 +2,7 @@ import Cryptor
 import Foundation
 import XCTest
 
-@testable import SRP
+import SRP
 
 class PySrptoolsTests: XCTestCase {
     func testClient() {
@@ -19,7 +19,7 @@ class PySrptoolsTests: XCTestCase {
         runClientTest(group: .N4096, algorithm: .sha256, username: "bouke", password: "test")
         runClientTest(group: .N6144, algorithm: .sha256, username: "bouke", password: "test")
         runClientTest(group: .N8192, algorithm: .sha256, username: "bouke", password: "test")
-}
+    }
 
     func runClientTest(
         group: Group,
@@ -37,6 +37,19 @@ class PySrptoolsTests: XCTestCase {
         }
         let client = Client(username: username, password: password, group: group, algorithm: algorithm)
 
+        let debugInfo: () -> String = {
+            return [
+                "username: \(username)",
+                "password: \(password)",
+                "group: \(group)",
+                "algorithm: \(algorithm)",
+                "salt: \(server.salt?.hex ?? "N/A")",
+                "verificationKey: \(server.verificationKey?.hex ?? "N/A")",
+                "serverPrivateKey: \(server.privateKey?.hex ?? "N/A")",
+                "clientPrivateKey: \(client.privateKey.hex)"
+            ].joined(separator: ", ")
+        }
+
         // The server generates the challenge: pre-defined salt, public key B
         // Server->Client: salt, B
         let s: Data
@@ -44,7 +57,7 @@ class PySrptoolsTests: XCTestCase {
         do {
             (s, B) = try server.getChallenge(publicKey: client.publicKey)
         } catch {
-            return XCTFail("Server didn't return a challenge: \(error)", file: file, line: line)
+            return XCTFail("Server didn't return a challenge: \(error) -- \(debugInfo())", file: file, line: line)
         }
 
         // Using (salt, B), the client generates the proof M
@@ -53,7 +66,7 @@ class PySrptoolsTests: XCTestCase {
         do {
             M = try client.processChallenge(salt: s, publicKey: B)
         } catch {
-            return XCTFail("Client couldn't process challenge: \(error)")
+            return XCTFail("Client couldn't process challenge: \(error) -- \(debugInfo())")
         }
 
         // Using M, the server verifies the proof and calculates a proof for the client
@@ -62,14 +75,14 @@ class PySrptoolsTests: XCTestCase {
         do {
             HAMK = try server.verifySession(keyProof: M)
         } catch {
-            return XCTFail("Server couldn't verify the session: \(error)", file: file, line: line)
+            return XCTFail("Server couldn't verify the session: \(error) -- \(debugInfo())", file: file, line: line)
         }
 
         // Using H(AMK), the client verifies the server's proof
         do {
             try client.verifySession(keyProof: HAMK)
         } catch {
-            return XCTFail("Client couldn't verify the session: \(error)", file: file, line: line)
+            return XCTFail("Client couldn't verify the session: \(error) -- \(debugInfo())", file: file, line: line)
         }
 
         // At this point, the client is authenticated as well
@@ -80,10 +93,10 @@ class PySrptoolsTests: XCTestCase {
         do {
             serverSessionKey = try server.getSessionKey()
         } catch {
-            return XCTFail("Server didn't provide a session key: \(error)", file: file, line: line)
+            return XCTFail("Server didn't provide a session key: \(error) -- \(debugInfo())", file: file, line: line)
         }
 
-        XCTAssertEqual(serverSessionKey, client.sessionKey, "Session keys not equal")
+        XCTAssertEqual(serverSessionKey, client.sessionKey, "Session keys not equal -- \(debugInfo())")
     }
 
     func testServer() {
@@ -120,11 +133,24 @@ class PySrptoolsTests: XCTestCase {
             return XCTFail("Could not start remote client: \(error)", file: file, line: line)
         }
 
+        let debugInfo: () -> String = {
+            return [
+                "username: \(username)",
+                "password: \(password)",
+                "group: \(group)",
+                "algorithm: \(algorithm)",
+                "salt: \(salt.hex)",
+                "verificationKey: \(verificationKey.hex)",
+                "serverPrivateKey: \(server.privateKey.hex)",
+                "clientPrivateKey: \(client.privateKey?.hex ?? "N/A")"
+            ].joined(separator: ", ")
+        }
+
         let A: Data
         do {
             (_, A) = try client.startAuthentication()
         } catch {
-            return XCTFail("Client didn't return public key: \(error)", file: file, line: line)
+            return XCTFail("Client didn't return public key: \(error) -- \(debugInfo())", file: file, line: line)
         }
 
         // The server generates the challenge: pre-defined salt, public key B
@@ -137,7 +163,7 @@ class PySrptoolsTests: XCTestCase {
         do {
             M = try client.processChallenge(salt: s, publicKey: B)
         } catch {
-            return XCTFail("Client couldn't process challenge: \(error)", file: file, line: line)
+            return XCTFail("Client couldn't process challenge: \(error) -- \(debugInfo())", file: file, line: line)
         }
 
         // Using M, the server verifies the proof and calculates a proof for the client
@@ -146,7 +172,7 @@ class PySrptoolsTests: XCTestCase {
         do {
             HAMK = try server.verifySession(publicKey: A, keyProof: M)
         } catch {
-            return XCTFail("Server couldn't verify the session: \(error)", file: file, line: line)
+            return XCTFail("Server couldn't verify the session: \(error) -- \(debugInfo())", file: file, line: line)
         }
 
         // At this point, the server is authenticated
@@ -156,7 +182,7 @@ class PySrptoolsTests: XCTestCase {
         do {
             try client.verifySession(keyProof: HAMK)
         } catch {
-            return XCTFail("Client couldn't verify the session: \(error)", file: file, line: line)
+            return XCTFail("Client couldn't verify the session: \(error) -- \(debugInfo())", file: file, line: line)
         }
 
         // They now share a secret session key
@@ -164,7 +190,7 @@ class PySrptoolsTests: XCTestCase {
         do {
             clientSessionKey = try client.getSessionKey()
         } catch {
-            return XCTFail("Client didn't provide a session key: \(error)", file: file, line: line)
+            return XCTFail("Client didn't provide a session key: \(error) -- \(debugInfo())", file: file, line: line)
         }
 
         XCTAssertEqual(server.sessionKey, clientSessionKey, "Session keys not equal")
