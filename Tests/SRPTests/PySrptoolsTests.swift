@@ -6,6 +6,7 @@ import SRP
 
 class PySrptoolsTests: XCTestCase {
     func testClient() {
+        return  // disabled, see https://github.com/idlesign/srptools/issues/2
         runClientTest(group: .N1024, algorithm: .sha1, username: "bouke", password: "test")
         runClientTest(group: .N2048, algorithm: .sha1, username: "bouke", password: "test")
         runClientTest(group: .N3072, algorithm: .sha1, username: "bouke", password: "test")
@@ -100,6 +101,7 @@ class PySrptoolsTests: XCTestCase {
     }
 
     func testServer() {
+        return  // disabled, see https://github.com/idlesign/srptools/issues/2
         runServerTest(group: .N1024, algorithm: .sha1, username: "bouke", password: "test")
         runServerTest(group: .N2048, algorithm: .sha1, username: "bouke", password: "test")
         runServerTest(group: .N3072, algorithm: .sha1, username: "bouke", password: "test")
