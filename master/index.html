@@ -107,7 +107,7 @@
     <span class="s">"bob"</span><span class="p">:</span> <span class="nf">createSaltedVerificationKey</span><span class="p">(</span><span class="nv">username</span><span class="p">:</span> <span class="s">"bob"</span><span class="p">,</span> <span class="nv">password</span><span class="p">:</span> <span class="s">"qwerty12345"</span><span class="p">),</span>
 <span class="p">]</span>
 
-<span class="c1">// Alice wants to authenticate, it sends her username to the server.</span>
+<span class="c1">// Alice wants to authenticate, she sends her username to the server.</span>
 <span class="k">let</span> <span class="nv">client</span> <span class="o">=</span> <span class="kt">Client</span><span class="p">(</span><span class="nv">username</span><span class="p">:</span> <span class="s">"alice"</span><span class="p">,</span> <span class="nv">password</span><span class="p">:</span> <span class="s">"password123"</span><span class="p">)</span>
 <span class="nf">let</span> <span class="p">(</span><span class="n">username</span><span class="p">,</span> <span class="n">clientPublicKey</span><span class="p">)</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="nf">startAuthentication</span><span class="p">()</span>
 
