@@ -121,7 +121,7 @@ if args.command == "server":
     # Client => Server: M
     sys.stdout.write("M: ")
     sys.stdout.flush()
-    M = input()
+    M = input().lstrip("0")
 
     # Process client public and verify session key proof.
     server_session.process(A, salt)
@@ -155,7 +155,7 @@ if args.command == "client":
     # Server => Client: HAMK
     sys.stdout.write("HAMK: ")
     sys.stdout.flush()
-    HAMK = input()
+    HAMK = input().lstrip("0")
     assert client_session.verify_proof(HAMK)
     print("OK")
 
