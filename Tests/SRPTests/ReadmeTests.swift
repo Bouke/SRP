@@ -11,7 +11,7 @@ class ReadmeTests: XCTestCase {
             "bob": createSaltedVerificationKey(username: "bob", password: "qwerty12345"),
         ]
 
-        // Alice wants to authenticate, it sends her username to the server.
+        // Alice wants to authenticate, she sends her username to the server.
         let client = Client(username: "alice", password: "password123")
         let (username, clientPublicKey) = client.startAuthentication()
 
