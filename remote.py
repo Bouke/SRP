@@ -80,6 +80,11 @@ algorithms = {
     "sha256": constants.HASH_SHA_256,
 }
 
+ensure_hash_sizes = {
+    "sha1": lambda hex: hex.zfill(40),
+    "sha256": lambda hex: hex.zfill(64),
+}
+
 parser = argparse.ArgumentParser(description="SRP Server")
 parser.add_argument("--group", default="N2048")
 parser.add_argument("--algorithm", default="sha1")
@@ -97,6 +102,7 @@ args = parser.parse_args()
 prime = groups[args.group][0]
 generator = groups[args.group][1]
 hash_func = algorithms[args.algorithm]
+ensure_hash_size = ensure_hash_sizes[args.algorithm]
 context = SRPContext(args.username, args.password, prime=prime, generator=generator, hash_func=hash_func)
 
 if args.command == "server":
@@ -128,10 +134,10 @@ if args.command == "server":
     assert server_session.verify_proof(M)
 
     # Server => Client: HAMK
-    print("HAMK:", even_length_hex(server_session.key_proof_hash))
+    print("HAMK:", ensure_hash_size(server_session.key_proof_hash))
 
     # Always keep the key secret! It is printed to validate the implementation.
-    print("K:", even_length_hex(server_session.key), file=sys.stderr)
+    print("K:", ensure_hash_size(server_session.key), file=sys.stderr)
 
 if args.command == "client":
     client_session = SRPClientSession(context)
@@ -150,7 +156,7 @@ if args.command == "client":
     client_session.process(B, s)
 
     # Client => Server: M
-    print("M:", even_length_hex(client_session.key_proof))
+    print("M:", ensure_hash_size(client_session.key_proof))
 
     # Server => Client: HAMK
     sys.stdout.write("HAMK: ")
@@ -160,4 +166,4 @@ if args.command == "client":
     print("OK")
 
     # Always keep the key secret! It is printed to validate the implementation.
-    print("K:", even_length_hex(client_session.key), file=sys.stderr)
+    print("K:", ensure_hash_size(client_session.key), file=sys.stderr)
