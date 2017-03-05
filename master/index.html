@@ -104,7 +104,7 @@
 <pre class="highlight swift"><code><span class="c1">// This is a database of users, along with their salted verification keys</span>
 <span class="k">let</span> <span class="nv">userStore</span><span class="p">:</span> <span class="p">[</span><span class="kt">String</span><span class="p">:</span> <span class="p">(</span><span class="nv">salt</span><span class="p">:</span> <span class="kt">Data</span><span class="p">,</span> <span class="nv">verificationKey</span><span class="p">:</span> <span class="kt">Data</span><span class="p">)]</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s">"alice"</span><span class="p">:</span> <span class="nf">createSaltedVerificationKey</span><span class="p">(</span><span class="nv">username</span><span class="p">:</span> <span class="s">"alice"</span><span class="p">,</span> <span class="nv">password</span><span class="p">:</span> <span class="s">"password123"</span><span class="p">),</span>
-    <span class="s">"bob"</span><span class="p">:</span> <span class="nf">createSaltedVerificationKey</span><span class="p">(</span><span class="nv">username</span><span class="p">:</span> <span class="s">"alice"</span><span class="p">,</span> <span class="nv">password</span><span class="p">:</span> <span class="s">"qwerty12345"</span><span class="p">),</span>
+    <span class="s">"bob"</span><span class="p">:</span> <span class="nf">createSaltedVerificationKey</span><span class="p">(</span><span class="nv">username</span><span class="p">:</span> <span class="s">"bob"</span><span class="p">,</span> <span class="nv">password</span><span class="p">:</span> <span class="s">"qwerty12345"</span><span class="p">),</span>
 <span class="p">]</span>
 
 <span class="c1">// Alice wants to authenticate, it sends her username to the server.</span>
@@ -137,6 +137,8 @@
 <span class="c1">// further communication between client and server.</span>
 <span class="nf">assert</span><span class="p">(</span><span class="n">server</span><span class="o">.</span><span class="n">sessionKey</span> <span class="o">==</span> <span class="n">client</span><span class="o">.</span><span class="n">sessionKey</span><span class="p">)</span>
 </code></pre>
+
+<p>More information can be found in the <a href="http://boukehaarsma.nl/SRP">documentation</a>.</p>
 <a href='#references' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h2 id='references'>References</h2>
 
 <ul>
