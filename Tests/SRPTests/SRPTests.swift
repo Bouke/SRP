@@ -26,6 +26,11 @@ class SRPTests: XCTestCase {
         runTest(group: group, algorithm: .sha256, username: "alice", password: "password123")
     }
 
+    func testUtf8() {
+        runTest(group: .N1024, algorithm: .sha1, username: "bõūkę", password: "tėšt")
+        runTest(group: .N1024, algorithm: .sha1, username: "bõūkę", password: "😅")
+    }
+
     func runTest(
         group: Group,
         algorithm: Digest.Algorithm,
