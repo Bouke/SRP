@@ -33,23 +33,27 @@ public class Client {
     ///   - algorithm: which `Digest.Algorithm` to use, again this
     ///       must be the same for the server as well as the pre-stored 
     ///       verificationKey.
-    ///   - secret: client's private key (must not be re-used).
+    ///   - privateKey: (optional) custom private key (a); if providing 
+    ///       the private key of the `Client`, make sure to provide a 
+    ///       good random key of at least 32 bytes. Default is to 
+    ///       generate a private key of 128 bytes. You MUST not re-use
+    ///       the private key between sessions.
     public init(
         username: String,
         password: String,
         group: Group = .N2048,
         algorithm: Digest.Algorithm = .sha1,
-        secret: Data? = nil)
+        privateKey: Data? = nil)
     {
         self.group = group
         self.algorithm = algorithm
         self.username = username
         self.password = password
 
-        if let secret = secret {
-            a = BigUInt(secret)
+        if let privateKey = privateKey {
+            a = BigUInt(privateKey)
         } else {
-            a = BigUInt(Data(bytes: try! Random.generate(byteCount: 32)))
+            a = BigUInt(Data(bytes: try! Random.generate(byteCount: 128)))
         }
         // A = g^a % N
         A = group.g.power(a, modulus: group.N)

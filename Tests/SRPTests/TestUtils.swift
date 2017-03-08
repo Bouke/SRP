@@ -149,13 +149,15 @@ class RemoteServer: Remote {
     ///   - password:
     ///   - group:
     ///   - algorithm:
+    ///   - privateKey:
+    ///   - salt:
     /// - Throws: on I/O Error
     init(
         username: String,
         password: String,
         group: Group = .N2048,
         algorithm: Digest.Algorithm = .sha1,
-        secret: Data? = nil,
+        privateKey: Data? = nil,
         salt: Data? = nil)
         throws
     {
@@ -177,8 +179,8 @@ class RemoteServer: Remote {
                              password.data(using: .utf8)!.hex,
                              "--group", "\(group)",
                              "--algorithm", "\(algorithm)"]
-        if let secret = secret {
-            process.arguments!.append(contentsOf: ["--private", secret.hex])
+        if let privateKey = privateKey {
+            process.arguments!.append(contentsOf: ["--private", privateKey.hex])
         }
         if let salt = salt {
             process.arguments!.append(contentsOf: ["--salt", salt.hex])
@@ -240,13 +242,14 @@ class RemoteClient: Remote {
     ///   - password:
     ///   - group:
     ///   - algorithm:
+    ///   - privateKey:
     /// - Throws: on I/O Error
     init(
         username: String,
         password: String,
         group: Group = .N2048,
         algorithm: Digest.Algorithm = .sha1,
-        secret: Data? = nil)
+        privateKey: Data? = nil)
         throws
     {
         self.username = username
@@ -263,8 +266,8 @@ class RemoteClient: Remote {
                              password.data(using: .utf8)!.hex,
                              "--group", "\(group)",
                              "--algorithm", "\(algorithm)"]
-        if let secret = secret {
-            process.arguments!.append(contentsOf: ["--private", secret.hex])
+        if let privateKey = privateKey {
+            process.arguments!.append(contentsOf: ["--private", privateKey.hex])
         }
         super.init(process: process)
 

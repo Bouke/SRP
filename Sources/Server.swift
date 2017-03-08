@@ -37,25 +37,31 @@ public class Server {
     ///   - algorithm: which `Digest.Algorithm` to use, again this
     ///       must be the same for the client as well as the pre-stored
     ///       verificationKey.
-    ///   - secret: server's private key, when running multiple 
-    ///       instances the private key should be shared.
+    ///   - privateKey: (optional) custom private key (b); if providing
+    ///       the private key of the `Server`, make sure to provide a
+    ///       good random key of at least 32 bytes. Default is to
+    ///       generate a private key of 128 bytes. You MUST not re-use
+    ///       the private key between sessions. However the private key
+    ///       might be shared when running multiple instances and an
+    ///       authentication session might be handled by multiple
+    ///       instances.
     public init(
         username: String,
         salt: Data,
         verificationKey: Data,
         group: Group = .N2048,
         algorithm: Digest.Algorithm = .sha1,
-        secret: Data? = nil)
+        privateKey: Data? = nil)
     {
         self.group = group
         self.algorithm = algorithm
         self.salt = salt
         self.username = username
 
-        if let secret = secret {
-            b = BigUInt(secret)
+        if let privateKey = privateKey {
+            b = BigUInt(privateKey)
         } else {
-            b = BigUInt(Data(bytes: try! Random.generate(byteCount: 32)))
+            b = BigUInt(Data(bytes: try! Random.generate(byteCount: 128)))
         }
         let k = calculate_k(group: group, algorithm: algorithm)
         v = BigUInt(verificationKey)
