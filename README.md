@@ -54,9 +54,10 @@ More information can be found in the [documentation](http://boukehaarsma.nl/SRP)
 
 ## Credits
 
-This library was written by [Bouke Haarsma](https://twitter.com/BoukeHaarsma).
+This library was written by [Bouke Haarsma][4].
 
 [0]: https://tools.ietf.org/html/rfc2945
 [1]: https://tools.ietf.org/html/rfc5054
 [2]: https://pypi.python.org/pypi/srp
 [3]: https://pypi.python.org/pypi/srptools
+[4]: https://twitter.com/BoukeHaarsma
