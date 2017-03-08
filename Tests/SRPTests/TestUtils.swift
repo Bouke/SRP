@@ -106,19 +106,24 @@ class Remote {
     }
 
     fileprivate func readline(from pipe: BufferedPipe) throws -> String {
-        repeat {
+        while true {
             if let eol = pipe.buffer.index(of: 10) {
                 defer {
                     pipe.buffer.removeFirst(eol + 1)
                 }
-                guard let line = String(data: Data(pipe.buffer[0..<eol]), encoding: .ascii) else {
+                guard let line = String(data: Data(pipe.buffer[0..<eol]), encoding: .utf8) else {
                     throw RemoteError.decodingError
                 }
                 return line
             }
-            pipe.buffer.append(pipe.fileHandleForReading.availableData)
-        } while process.isRunning
-        throw RemoteError.unexpectedExit
+            let availableData = pipe.fileHandleForReading.availableData
+            pipe.buffer.append(availableData)
+
+            if availableData.count == 0 && !process.isRunning {
+                // No more data coming and buffer doesn't contain a newline
+                throw RemoteError.unexpectedExit
+            }
+        }
     }
 
     fileprivate func readError() -> RemoteError {
