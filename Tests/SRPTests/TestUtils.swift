@@ -168,8 +168,8 @@ class RemoteServer: Remote {
         process.launchPath = python
         process.arguments = [remotepy.path,
                              "server",
-                             username,
-                             password,
+                             username.data(using: .utf8)!.hex,
+                             password.data(using: .utf8)!.hex,
                              "--group", "\(group)",
                              "--algorithm", "\(algorithm)"]
         if let secret = secret {
@@ -254,8 +254,8 @@ class RemoteClient: Remote {
         process.launchPath = python
         process.arguments = [remotepy.path,
                              "client",
-                             username,
-                             password,
+                             username.data(using: .utf8)!.hex,
+                             password.data(using: .utf8)!.hex,
                              "--group", "\(group)",
                              "--algorithm", "\(algorithm)"]
         if let secret = secret {

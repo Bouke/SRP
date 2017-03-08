@@ -21,6 +21,11 @@ class PySrptoolsTests: XCTestCase {
         runClientTest(group: .N8192, algorithm: .sha256, username: "bouke", password: "test")
     }
 
+    func testClientUtf8() {
+        runClientTest(group: .N1024, algorithm: .sha1, username: "bõūkę", password: "tėšt")
+    }
+
+
     func runClientTest(
         group: Group,
         algorithm: Digest.Algorithm,
@@ -127,6 +132,10 @@ class PySrptoolsTests: XCTestCase {
         runServerTest(group: .N4096, algorithm: .sha256, username: "bouke", password: "test")
         runServerTest(group: .N6144, algorithm: .sha256, username: "bouke", password: "test")
         runServerTest(group: .N8192, algorithm: .sha256, username: "bouke", password: "test")
+    }
+
+    func testServerUtf8() {
+        runServerTest(group: .N1024, algorithm: .sha1, username: "bõūkę", password: "tėšt")
     }
 
     func runServerTest(

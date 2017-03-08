@@ -2,6 +2,7 @@
 from __future__ import print_function
 
 import argparse
+import binascii
 import sys
 
 from srptools import SRPClientSession
@@ -22,6 +23,9 @@ def even_length_hex(hex):
     if len(hex) % 2 == 1:
         hex = "0" + hex
     return hex
+
+def hex_encoded_utf8(value):
+    return binascii.unhexlify(str.encode(value))
 
 # 8192 bits prime is not a built-in prime in srptools,
 # so a custom prime/generator is defined.
@@ -96,8 +100,8 @@ subparsers.is_required = True
 subparsers.add_parser("server")
 subparsers.add_parser("client")
 
-parser.add_argument("username")
-parser.add_argument("password")
+parser.add_argument("username", type=hex_encoded_utf8)
+parser.add_argument("password", type=hex_encoded_utf8)
 
 args = parser.parse_args()
 
