@@ -6,7 +6,7 @@ import sys
 
 from srptools import SRPClientSession
 from srptools import SRPContext, SRPServerSession, constants
-from srptools.utils import hex_from
+from srptools.utils import hex_from, int_from_hex
 
 # Support Python 2 and 3
 try: 
@@ -88,6 +88,8 @@ ensure_hash_sizes = {
 parser = argparse.ArgumentParser(description="SRP Server")
 parser.add_argument("--group", default="N2048")
 parser.add_argument("--algorithm", default="sha1")
+parser.add_argument("--salt")
+parser.add_argument("--private")
 
 subparsers = parser.add_subparsers(dest="command")
 subparsers.is_required = True
@@ -106,6 +108,9 @@ ensure_hash_size = ensure_hash_sizes[args.algorithm]
 context = SRPContext(args.username, args.password, prime=prime, generator=generator, hash_func=hash_func)
 
 if args.command == "server":
+    if args.salt:
+        context.generate_salt = lambda: int_from_hex(args.salt)
+
     _, password_verifier, salt = context.get_user_data_triplet()
 
     print("v:", even_length_hex(password_verifier), file=sys.stderr)
@@ -116,7 +121,7 @@ if args.command == "server":
     A = input()
 
     # Receive username from client and generate server public.
-    server_session = SRPServerSession(context, password_verifier)
+    server_session = SRPServerSession(context, password_verifier, private=args.private)
 
     print("b:", even_length_hex(server_session.private), file=sys.stderr)
 
@@ -140,7 +145,7 @@ if args.command == "server":
     print("K:", ensure_hash_size(server_session.key), file=sys.stderr)
 
 if args.command == "client":
-    client_session = SRPClientSession(context)
+    client_session = SRPClientSession(context, private=args.private)
     print("a:", even_length_hex(client_session.private), file=sys.stderr)
 
     # Client => Server: username, A

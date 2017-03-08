@@ -39,7 +39,6 @@ class SRPTests: XCTestCase {
         file: StaticString = #file,
         line: UInt = #line)
     {
-
         /* Create a salt+verification key for the user's password. The salt and
          * key need to be computed at the time the user's password is set and
          * must be stored by the server-side application for use during the

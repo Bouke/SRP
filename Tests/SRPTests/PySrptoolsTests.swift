@@ -6,7 +6,6 @@ import SRP
 
 class PySrptoolsTests: XCTestCase {
     func testClient() {
-        return  // disabled, see https://github.com/idlesign/srptools/issues/2
         runClientTest(group: .N1024, algorithm: .sha1, username: "bouke", password: "test")
         runClientTest(group: .N2048, algorithm: .sha1, username: "bouke", password: "test")
         runClientTest(group: .N3072, algorithm: .sha1, username: "bouke", password: "test")
@@ -30,13 +29,27 @@ class PySrptoolsTests: XCTestCase {
         file: StaticString = #file,
         line: UInt = #line)
     {
+        // Because of an interoperability issue with the library `srptools`,
+        // the keys and salt are predefined. When the issue has been resolved,
+        // these should be randomly generated again.
+        //-TODO: make tests random again after https://github.com/idlesign/srptools/issues/2 has been resolved
+
         let server: RemoteServer
         do {
-            server = try RemoteServer(username: username, password: password, group: group, algorithm: algorithm)
+            server = try RemoteServer(username: username,
+                                      password: password,
+                                      group: group,
+                                      algorithm: algorithm,
+                                      secret: try! Data(hex: "a6edb28a37955142e77bd767bf2f41e823904a9b37e5ef9538f7d804553a9f9b17b254e199c85747522dba571293d16d0a6a1e792d29fda0196e3c2ee4c72d37ae20d9521dfcc1395da6ceb2cb2dd5f86c40c66c61f68d1f6c000c0b6dc6043be720d12bd3fbb9ce2f775ef90fc4f9c0567cfcaabc4fc0d7459f5790114a2dfb"),
+                                      salt: try! Data(hex: "5c90beb7c6976084"))
         } catch {
             return XCTFail("Could not start remote server: \(error)", file: file, line: line)
         }
-        let client = Client(username: username, password: password, group: group, algorithm: algorithm)
+        let client = Client(username: username,
+                            password: password,
+                            group: group,
+                            algorithm: algorithm,
+                            secret: try! Data(hex: "e8bf050e0184b5cd5207a56a432386a41b22017ad77a9259914271e226036ed9"))
 
         let debugInfo: () -> String = {
             return [
@@ -101,7 +114,6 @@ class PySrptoolsTests: XCTestCase {
     }
 
     func testServer() {
-        return  // disabled, see https://github.com/idlesign/srptools/issues/2
         runServerTest(group: .N1024, algorithm: .sha1, username: "bouke", password: "test")
         runServerTest(group: .N2048, algorithm: .sha1, username: "bouke", password: "test")
         runServerTest(group: .N3072, algorithm: .sha1, username: "bouke", password: "test")
@@ -125,12 +137,30 @@ class PySrptoolsTests: XCTestCase {
         file: StaticString = #file,
         line: UInt = #line)
     {
-        let (salt, verificationKey) = createSaltedVerificationKey(username: username, password: password, group: group, algorithm: algorithm)
-        let server = Server(username: username, salt: salt, verificationKey: verificationKey, group: group, algorithm: algorithm)
+        // Because of an interoperability issue with the library `srptools`,
+        // the keys and salt are predefined. When the issue has been resolved,
+        // these should be randomly generated again.
+        //-TODO: make tests random again after https://github.com/idlesign/srptools/issues/2 has been resolved
+
+        let (salt, verificationKey) = createSaltedVerificationKey(username: username,
+                                                                  password: password,
+                                                                  salt: try! Data(hex: "3c1f72d18855ea5bf47ffd404868e715"),
+                                                                  group: group,
+                                                                  algorithm: algorithm)
+        let server = Server(username: username,
+                            salt: salt,
+                            verificationKey: verificationKey,
+                            group: group,
+                            algorithm: algorithm,
+                            secret: try! Data(hex: "cc6c536ecc84b45fe248fba7efec7f654707004f84be125b55fad246d16c94dc"))
 
         let client: RemoteClient
         do {
-            client = try RemoteClient(username: username, password: password, group: group, algorithm: algorithm)
+            client = try RemoteClient(username: username,
+                                      password: password,
+                                      group: group,
+                                      algorithm: algorithm,
+                                      secret: try! Data(hex: "9b06aedbc7c74734ac4053d31114b60aaffbf228c24c316ea6e141fb0c5f4c76639e63b6351e342fe10c7a641086b878cb10a1415f2afcba30229bc795f08bed3f09a2fe990c26c9a5f9c08f4a064cc6f1e83cb4863895eb37bd4e4325c95d1417e2ebd1a152b275c68bea8c7c4b952d658729ff0e99bc928173040c2b686b99"))
         } catch {
             return XCTFail("Could not start remote client: \(error)", file: file, line: line)
         }

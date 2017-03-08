@@ -149,7 +149,9 @@ class RemoteServer: Remote {
         username: String,
         password: String,
         group: Group = .N2048,
-        algorithm: Digest.Algorithm = .sha1)
+        algorithm: Digest.Algorithm = .sha1,
+        secret: Data? = nil,
+        salt: Data? = nil)
         throws
     {
         guard let python = ProcessInfo.processInfo.environment["PYTHON"] else {
@@ -170,6 +172,12 @@ class RemoteServer: Remote {
                              password,
                              "--group", "\(group)",
                              "--algorithm", "\(algorithm)"]
+        if let secret = secret {
+            process.arguments!.append(contentsOf: ["--private", secret.hex])
+        }
+        if let salt = salt {
+            process.arguments!.append(contentsOf: ["--salt", salt.hex])
+        }
         super.init(process: process)
 
         verificationKey = try Data(hex: read(label: "v", from: error))
@@ -232,7 +240,8 @@ class RemoteClient: Remote {
         username: String,
         password: String,
         group: Group = .N2048,
-        algorithm: Digest.Algorithm = .sha1)
+        algorithm: Digest.Algorithm = .sha1,
+        secret: Data? = nil)
         throws
     {
         self.username = username
@@ -249,9 +258,12 @@ class RemoteClient: Remote {
                              password,
                              "--group", "\(group)",
                              "--algorithm", "\(algorithm)"]
+        if let secret = secret {
+            process.arguments!.append(contentsOf: ["--private", secret.hex])
+        }
         super.init(process: process)
 
-        privateKey = try Data(hex: try read(label: "a", from: error))
+        self.privateKey = try Data(hex: try read(label: "a", from: error))
     }
 
     /// Read public key from stdout.
