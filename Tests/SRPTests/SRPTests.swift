@@ -134,7 +134,8 @@ class SRPTests: XCTestCase {
 
     static var allTests : [(String, (SRPTests) -> () throws -> Void)] {
         return [
-            ("testSuccess", testSuccess),
+            ("testSHA1", testSHA1),
+            ("testSHA256", testSHA256),
             ("testCustomGroupParameters", testCustomGroupParameters),
             ("testUtf8", testUtf8),
             ("testClientAborts", testClientAborts),
