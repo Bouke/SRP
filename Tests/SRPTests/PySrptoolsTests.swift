@@ -240,7 +240,9 @@ class PySrptoolsTests: XCTestCase {
     static var allTests : [(String, (PySrptoolsTests) -> () throws -> Void)] {
         return [
             ("testClient", testClient),
+            ("testClientUtf8", testClientUtf8),
             ("testServer", testServer),
+            ("testServerUtf8", testServerUtf8),
         ]
     }
 }

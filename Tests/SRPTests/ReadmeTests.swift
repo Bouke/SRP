@@ -45,7 +45,6 @@ class ReadmeTests: XCTestCase {
     static var allTests : [(String, (ReadmeTests) -> () throws -> Void)] {
         return [
             ("test", test),
-            ("test", test),
         ]
     }
 }

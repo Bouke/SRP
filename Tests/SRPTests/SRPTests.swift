@@ -134,6 +134,7 @@ class SRPTests: XCTestCase {
         return [
             ("testSuccess", testSuccess),
             ("testCustomGroupParameters", testCustomGroupParameters),
+            ("testUtf8", testUtf8),
             ("testClientAborts", testClientAborts),
             ("testServerAborts", testServerAborts),
         ]
