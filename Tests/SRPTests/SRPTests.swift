@@ -4,14 +4,16 @@ import SRP
 import XCTest
 
 class SRPTests: XCTestCase {
-    func testSuccess() {
+    func testSHA1() {
         runTest(group: .N1024, algorithm: .sha1, username: "alice", password: "password123")
         runTest(group: .N2048, algorithm: .sha1, username: "alice", password: "password123")
         runTest(group: .N3072, algorithm: .sha1, username: "alice", password: "password123")
         runTest(group: .N4096, algorithm: .sha1, username: "alice", password: "password123")
         runTest(group: .N6144, algorithm: .sha1, username: "alice", password: "password123")
         runTest(group: .N8192, algorithm: .sha1, username: "alice", password: "password123")
+    }
 
+    func testSHA256() {
         runTest(group: .N1024, algorithm: .sha256, username: "alice", password: "password123")
         runTest(group: .N2048, algorithm: .sha256, username: "alice", password: "password123")
         runTest(group: .N3072, algorithm: .sha256, username: "alice", password: "password123")
