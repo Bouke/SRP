@@ -15,15 +15,6 @@ try:
 except NameError: 
     pass
 
-
-# srptools uses '%x' formatting on strings, which doesn't
-# include leading zeroes. This function makes sure that
-# all hex outputs are of even length.
-def even_length_hex(hex):
-    if len(hex) % 2 == 1:
-        hex = "0" + hex
-    return hex
-
 def hex_encoded_utf8(value):
     return binascii.unhexlify(str.encode(value))
 
@@ -117,7 +108,7 @@ if args.command == "server":
 
     _, password_verifier, salt = context.get_user_data_triplet()
 
-    print("v:", even_length_hex(password_verifier), file=sys.stderr)
+    print("v:", password_verifier, file=sys.stderr)
 
     # Client => Server: username, A
     sys.stdout.write("A: ")
@@ -127,19 +118,21 @@ if args.command == "server":
     # Receive username from client and generate server public.
     server_session = SRPServerSession(context, password_verifier, private=args.private)
 
-    print("b:", even_length_hex(server_session.private), file=sys.stderr)
+    print("b:", server_session.private, file=sys.stderr)
 
     # Server => Client: s, B
-    print("s:", even_length_hex(salt))
-    print("B:", even_length_hex(server_session.public))
+    print("s:", salt)
+    print("B:", server_session.public)
 
     # Client => Server: M
     sys.stdout.write("M: ")
     sys.stdout.flush()
-    M = input().lstrip("0")
+    M = input()
 
     # Process client public and verify session key proof.
     server_session.process(A, salt)
+    print("expected M:", server_session.key_proof, file=sys.stderr)
+
     assert server_session.verify_proof(M)
 
     # Server => Client: HAMK
@@ -150,10 +143,10 @@ if args.command == "server":
 
 if args.command == "client":
     client_session = SRPClientSession(context, private=args.private)
-    print("a:", even_length_hex(client_session.private), file=sys.stderr)
+    print("a:", client_session.private, file=sys.stderr)
 
     # Client => Server: username, A
-    print("A:", even_length_hex(client_session.public))
+    print("A:", client_session.public)
 
     # Server => Client: s, B
     sys.stdout.write("s: ")
@@ -170,7 +163,7 @@ if args.command == "client":
     # Server => Client: HAMK
     sys.stdout.write("HAMK: ")
     sys.stdout.flush()
-    HAMK = input().lstrip("0")
+    HAMK = input()
     assert client_session.verify_proof(HAMK)
     print("OK")
 
