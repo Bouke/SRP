@@ -2,12 +2,12 @@
 from __future__ import print_function
 
 import argparse
-import binascii
+from binascii import unhexlify
 import sys
 
 from srptools import SRPClientSession
 from srptools import SRPContext, SRPServerSession, constants
-from srptools.utils import hex_from, int_from_hex
+from srptools.utils import hex_from, int_from_hex, value_encode
 
 # Support Python 2 and 3
 try: 
@@ -16,7 +16,7 @@ except NameError:
     pass
 
 def hex_encoded_utf8(value):
-    return binascii.unhexlify(str.encode(value))
+    return unhexlify(str.encode(value))
 
 # 8192 bits prime is not a built-in prime in srptools,
 # so a custom prime/generator is defined.
@@ -104,9 +104,10 @@ context = SRPContext(args.username, args.password, prime=prime, generator=genera
 
 if args.command == "server":
     if args.salt:
-        context.generate_salt = lambda: int_from_hex(args.salt)
-
-    _, password_verifier, salt = context.get_user_data_triplet()
+        salt = args.salt
+        password_verifier = value_encode(context.get_common_password_verifier(context.get_common_password_hash(unhexlify(salt))))
+    else:
+        _, password_verifier, salt = context.get_user_data_triplet()
 
     print("v:", password_verifier, file=sys.stderr)
 
