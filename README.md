@@ -1,7 +1,9 @@
 Secure Remote Password (SRP) for Swift
 ======================================
 
-SRP6 for Swift. API designed similar to the Python packages [srp][2] and [srptools][3].
+Secure Remote Password is a authentication protocol to prove your identity to
+another party, using a password, but without ever revealing that password to
+other parties. Not even the party you are proving your identity. See [Secure Remote Password protocol][5] for more information on this protocol.
 
 [![Build Status](https://travis-ci.org/Bouke/SRP.svg?branch=master)](https://travis-ci.org/Bouke/SRP)
 
@@ -47,6 +49,16 @@ assert(server.sessionKey == client.sessionKey)
 
 More information can be found in the [documentation](http://boukehaarsma.nl/SRP).
 
+## Compatibility with other implementations
+
+I like to believe this implementation does correctly implements the RFC.
+However not all implementations do and might result in not being able to
+authenticate accross implementations. And subtle differences might result in
+low failure rates due to the randomness this protocol includes.
+
+* Python: ❌ [srp][2] is not compatible; it doesn't correctly calculate `k`.
+* Python: ✅ [srptools][3] is compatible.
+
 ## References
 
 * [RFC 2945 - The SRP Authentication and Key Exchange System][0]
@@ -61,3 +73,4 @@ This library was written by [Bouke Haarsma][4].
 [2]: https://pypi.python.org/pypi/srp
 [3]: https://pypi.python.org/pypi/srptools
 [4]: https://twitter.com/BoukeHaarsma
+[5]: https://en.wikipedia.org/wiki/Secure_Remote_Password_protocol
