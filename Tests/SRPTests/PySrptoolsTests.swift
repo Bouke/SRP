@@ -6,6 +6,10 @@ import XCTest
 
 class PySrptoolsTests: XCTestCase {
     func testClient() {
+        guard ProcessInfo.processInfo.environment["PYTHON"] != nil else {
+            return NSLog("Skipped integration test at \(#file):\(#line)")
+        }
+
         runClientTest(group: .N1024, algorithm: .sha1, username: "bouke", password: "test")
         runClientTest(group: .N2048, algorithm: .sha1, username: "bouke", password: "test")
         runClientTest(group: .N3072, algorithm: .sha1, username: "bouke", password: "test")
@@ -22,6 +26,10 @@ class PySrptoolsTests: XCTestCase {
     }
 
     func testClientUtf8() {
+        guard ProcessInfo.processInfo.environment["PYTHON"] != nil else {
+            return NSLog("Skipped integration test at \(#file):\(#line)")
+        }
+
         runClientTest(group: .N1024, algorithm: .sha1, username: "bõūkę", password: "tėšt")
     }
 
@@ -121,6 +129,10 @@ class PySrptoolsTests: XCTestCase {
     }
 
     func testServer() {
+        guard ProcessInfo.processInfo.environment["PYTHON"] != nil else {
+            return NSLog("Skipped integration test at \(#file):\(#line)")
+        }
+
         runServerTest(group: .N1024, algorithm: .sha1, username: "bouke", password: "test")
         runServerTest(group: .N2048, algorithm: .sha1, username: "bouke", password: "test")
         runServerTest(group: .N3072, algorithm: .sha1, username: "bouke", password: "test")
@@ -137,6 +149,10 @@ class PySrptoolsTests: XCTestCase {
     }
 
     func testServerUtf8() {
+        guard ProcessInfo.processInfo.environment["PYTHON"] != nil else {
+            return NSLog("Skipped integration test at \(#file):\(#line)")
+        }
+
         runServerTest(group: .N1024, algorithm: .sha1, username: "bõūkę", password: "tėšt")
     }
 
