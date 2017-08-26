@@ -109,9 +109,10 @@ class Remote {
         while true {
             if let eol = pipe.buffer.index(of: 10) {
                 defer {
-                    pipe.buffer.removeFirst(eol + 1)
+                    let lineLength = eol - pipe.buffer.startIndex + 1
+                    pipe.buffer.removeFirst(lineLength)
                 }
-                guard let line = String(data: Data(pipe.buffer[0..<eol]), encoding: .utf8) else {
+                guard let line = String(data: Data(pipe.buffer[pipe.buffer.startIndex..<eol]), encoding: .utf8) else {
                     throw RemoteError.decodingError
                 }
                 return line
