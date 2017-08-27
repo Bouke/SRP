@@ -53,10 +53,6 @@ class Remote {
         var fileHandleForReading: FileHandle {
             return pipe.fileHandleForReading
         }
-
-        var fileHandleForWriting: FileHandle {
-            return pipe.fileHandleForWriting
-        }
     }
 
     fileprivate init(process: Process) {
