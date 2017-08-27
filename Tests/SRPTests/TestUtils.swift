@@ -71,6 +71,9 @@ class Remote {
 
 
     fileprivate func write(prompt expectedPrompt: String, line: String) throws {
+        #if DEBUG
+            print("DEBUG: Expecting prompt '\(expectedPrompt)'")
+        #endif
         let prompt = try readprompt(from: output)
         guard prompt == "\(expectedPrompt): " else {
             throw RemoteError.unexpectedPrompt(prompt)
@@ -80,6 +83,10 @@ class Remote {
 
     private func writeline(_ line: String) {
         input.fileHandleForWriting.write("\(line)\n".data(using: .ascii)!)
+
+        #if DEBUG
+            print("DEBUG: > \(line)")
+        #endif
     }
 
     private func readprompt(from pipe: BufferedPipe) throws -> String {
@@ -90,16 +97,32 @@ class Remote {
             defer { pipe.buffer = Data() }
             return String(data: pipe.buffer, encoding: .ascii)!
         } else {
-            return String(data: pipe.fileHandleForReading.availableData, encoding: .ascii)!
+            let availableData = pipe.fileHandleForReading.availableData
+            guard let prompt = String(data: availableData, encoding: .ascii) else {
+                throw RemoteError.decodingError
+            }
+            #if DEBUG
+                print("DEBUG: < \(prompt)")
+            #endif
+            return prompt
         }
     }
 
     fileprivate func read(label: String, from pipe: BufferedPipe) throws -> (String) {
+        #if DEBUG
+            print("DEBUG: Expecting label '\(label)'")
+        #endif
         let splitted = try readline(from: pipe).components(separatedBy: ": ")
         guard splitted.count == 2 else {
+            #if DEBUG
+                print("ERROR: \(readError())")
+            #endif
             throw RemoteError.valueExpected
         }
         guard label == splitted[0] else {
+            #if DEBUG
+                print("ERROR: \(readError())")
+            #endif
             throw RemoteError.unexpectedValueLabel(splitted[0])
         }
         return splitted[1]
@@ -115,9 +138,23 @@ class Remote {
                     throw RemoteError.decodingError
                 }
                 return line
+            } else if pipe.buffer.count > 0 {
+                #if DEBUG
+                    print("DEBUG: Available buffer, but without a newline")
+                #endif
             }
             let availableData = pipe.fileHandleForReading.availableData
             pipe.buffer.append(availableData)
+
+            #if DEBUG
+                if let availableOutput = String(data: availableData, encoding: .utf8) {
+                    for line in availableOutput.characters.split(separator: "\n") {
+                        print("DEBUG: < \(String(line))")
+                    }
+                } else {
+                    print("DEBUG: Could not decode output")
+                }
+            #endif
 
             if availableData.count == 0 && !process.isRunning {
                 // No more data coming and buffer doesn't contain a newline
