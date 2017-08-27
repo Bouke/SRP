@@ -132,9 +132,10 @@ class Remote {
         while true {
             if let eol = pipe.buffer.index(of: 10) {
                 defer {
-                    pipe.buffer.removeFirst(eol + 1)
+                    // Slicing of Data is broken on Linux... workaround by creating new Data.
+                    pipe.buffer = Data(pipe.buffer.dropFirst(eol - pipe.buffer.startIndex + 1))
                 }
-                guard let line = String(data: Data(pipe.buffer[0..<eol]), encoding: .utf8) else {
+                guard let line = String(data: Data(pipe.buffer[pipe.buffer.startIndex..<eol]), encoding: .utf8) else {
                     throw RemoteError.decodingError
                 }
                 return line
@@ -143,6 +144,7 @@ class Remote {
                     print("DEBUG: Available buffer, but without a newline")
                 #endif
             }
+
             let availableData = pipe.fileHandleForReading.availableData
             pipe.buffer.append(availableData)
 
