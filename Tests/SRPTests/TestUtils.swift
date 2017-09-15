@@ -28,15 +28,15 @@ let remotepy = URL(fileURLWithPath: #file)
     .deletingLastPathComponent()
     .appendingPathComponent("remote.py")
 
-enum RemoteError: Error {
+indirect enum RemoteError: Error {
     case noPython
     case unexpectedPrompt(String)
     case commandFailure
     case commandFailureWithMessage(String)
-    case valueExpected
+    case valueExpected(RemoteError)
     case unexpectedValueLabel(String)
     case decodingError
-    case unexpectedExit
+    case unexpectedExit(RemoteError)
 }
 
 class Remote {
@@ -80,7 +80,7 @@ class Remote {
 
     private func readprompt(from pipe: BufferedPipe) throws -> String {
         if !process.isRunning {
-            throw RemoteError.unexpectedExit
+            throw RemoteError.unexpectedExit(readError())
         }
         if pipe.buffer.count > 0 {
             defer { pipe.buffer = Data() }
@@ -93,7 +93,7 @@ class Remote {
     fileprivate func read(label: String, from pipe: BufferedPipe) throws -> (String) {
         let splitted = try readline(from: pipe).components(separatedBy: ": ")
         guard splitted.count == 2 else {
-            throw RemoteError.valueExpected
+            throw RemoteError.valueExpected(readError())
         }
         guard label == splitted[0] else {
             throw RemoteError.unexpectedValueLabel(splitted[0])
@@ -118,7 +118,7 @@ class Remote {
 
             if availableData.count == 0 && !process.isRunning {
                 // No more data coming and buffer doesn't contain a newline
-                throw RemoteError.unexpectedExit
+                throw RemoteError.unexpectedExit(readError())
             }
         }
     }
@@ -185,7 +185,7 @@ class RemoteServer: Remote {
         }
         super.init(process: process)
 
-        verificationKey = try Data(hex: read(label: "v", from: error))
+        verificationKey = try Data(hex: read(label: "v", from: output))
     }
 
     /// Get server's challenge
@@ -196,7 +196,7 @@ class RemoteServer: Remote {
     func getChallenge(publicKey A: Data) throws -> (salt: Data, publicKey: Data) {
         do {
             try write(prompt: "A", line: A.hex)
-            privateKey = try Data(hex: try read(label: "b", from: error))
+            privateKey = try Data(hex: try read(label: "b", from: output))
             salt = try Data(hex: try read(label: "s", from: output))
             publicKey = try Data(hex: try read(label: "B", from: output))
             return (salt!, publicKey!)
@@ -213,7 +213,7 @@ class RemoteServer: Remote {
     func verifySession(keyProof M: Data) throws -> Data {
         do {
             try write(prompt: "M", line: M.hex)
-            expectedM = try Data(hex: try read(label: "expected M", from: error))
+            expectedM = try Data(hex: try read(label: "expected M", from: output))
             return try Data(hex: try read(label: "HAMK", from: output))
         } catch RemoteError.unexpectedExit {
             throw readError()
@@ -225,7 +225,7 @@ class RemoteServer: Remote {
     /// - Returns: session key
     /// - Throws: on I/O Error
     func getSessionKey() throws -> Data {
-        return try Data(hex: try read(label: "K", from: error))
+        return try Data(hex: try read(label: "K", from: output))
     }
 }
 
@@ -270,7 +270,7 @@ class RemoteClient: Remote {
         }
         super.init(process: process)
 
-        self.privateKey = try Data(hex: try read(label: "a", from: error))
+        self.privateKey = try Data(hex: try read(label: "a", from: output))
     }
 
     /// Read public key from stdout.
@@ -311,6 +311,6 @@ class RemoteClient: Remote {
     /// - Returns: session key (K)
     /// - Throws: on I/O Error
     func getSessionKey() throws -> Data {
-        return try Data(hex: try read(label: "K", from: error))
+        return try Data(hex: try read(label: "K", from: output))
     }
 }
