@@ -49,6 +49,11 @@ assert(server.sessionKey == client.sessionKey)
 
 More information can be found in the [documentation](http://boukehaarsma.nl/SRP).
 
+## Swift Compatibility
+
+Swift 4 is required with version 3 of this package. Use version 2 if you need 
+Swift 3 compatibility.
+
 ## Compatibility with other implementations
 
 I like to believe this implementation does correctly implements the RFC.

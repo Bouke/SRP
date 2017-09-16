@@ -109,7 +109,7 @@ if args.command == "server":
     else:
         _, password_verifier, salt = context.get_user_data_triplet()
 
-    print("v:", password_verifier, file=sys.stderr)
+    print("v:", password_verifier)
 
     # Client => Server: username, A
     sys.stdout.write("A: ")
@@ -119,7 +119,7 @@ if args.command == "server":
     # Receive username from client and generate server public.
     server_session = SRPServerSession(context, password_verifier, private=args.private)
 
-    print("b:", server_session.private, file=sys.stderr)
+    print("b:", server_session.private)
 
     # Server => Client: s, B
     print("s:", salt)
@@ -132,7 +132,7 @@ if args.command == "server":
 
     # Process client public and verify session key proof.
     server_session.process(A, salt)
-    print("expected M:", server_session.key_proof, file=sys.stderr)
+    print("expected M:", server_session.key_proof)
 
     assert server_session.verify_proof(M)
 
@@ -140,11 +140,11 @@ if args.command == "server":
     print("HAMK:", ensure_hash_size(server_session.key_proof_hash))
 
     # Always keep the key secret! It is printed to validate the implementation.
-    print("K:", ensure_hash_size(server_session.key), file=sys.stderr)
+    print("K:", ensure_hash_size(server_session.key))
 
 if args.command == "client":
     client_session = SRPClientSession(context, private=args.private)
-    print("a:", client_session.private, file=sys.stderr)
+    print("a:", client_session.private)
 
     # Client => Server: username, A
     print("A:", client_session.public)
@@ -169,4 +169,4 @@ if args.command == "client":
     print("OK")
 
     # Always keep the key secret! It is printed to validate the implementation.
-    print("K:", ensure_hash_size(client_session.key), file=sys.stderr)
+    print("K:", ensure_hash_size(client_session.key))

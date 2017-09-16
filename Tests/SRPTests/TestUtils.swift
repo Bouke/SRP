@@ -28,15 +28,15 @@ let remotepy = URL(fileURLWithPath: #file)
     .deletingLastPathComponent()
     .appendingPathComponent("remote.py")
 
-enum RemoteError: Error {
+indirect enum RemoteError: Error {
     case noPython
     case unexpectedPrompt(String)
     case commandFailure
     case commandFailureWithMessage(String)
-    case valueExpected
+    case valueExpected(RemoteError)
     case unexpectedValueLabel(String)
     case decodingError
-    case unexpectedExit
+    case unexpectedExit(RemoteError)
 }
 
 class Remote {
@@ -53,10 +53,6 @@ class Remote {
         var fileHandleForReading: FileHandle {
             return pipe.fileHandleForReading
         }
-
-        var fileHandleForWriting: FileHandle {
-            return pipe.fileHandleForWriting
-        }
     }
 
     fileprivate init(process: Process) {
@@ -71,9 +67,6 @@ class Remote {
 
 
     fileprivate func write(prompt expectedPrompt: String, line: String) throws {
-        #if DEBUG
-            print("DEBUG: Expecting prompt '\(expectedPrompt)'")
-        #endif
         let prompt = try readprompt(from: output)
         guard prompt == "\(expectedPrompt): " else {
             throw RemoteError.unexpectedPrompt(prompt)
@@ -83,46 +76,26 @@ class Remote {
 
     private func writeline(_ line: String) {
         input.fileHandleForWriting.write("\(line)\n".data(using: .ascii)!)
-
-        #if DEBUG
-            print("DEBUG: > \(line)")
-        #endif
     }
 
     private func readprompt(from pipe: BufferedPipe) throws -> String {
         if !process.isRunning {
-            throw RemoteError.unexpectedExit
+            throw RemoteError.unexpectedExit(readError())
         }
         if pipe.buffer.count > 0 {
             defer { pipe.buffer = Data() }
             return String(data: pipe.buffer, encoding: .ascii)!
         } else {
-            let availableData = pipe.fileHandleForReading.availableData
-            guard let prompt = String(data: availableData, encoding: .ascii) else {
-                throw RemoteError.decodingError
-            }
-            #if DEBUG
-                print("DEBUG: < \(prompt)")
-            #endif
-            return prompt
+            return String(data: pipe.fileHandleForReading.availableData, encoding: .ascii)!
         }
     }
 
     fileprivate func read(label: String, from pipe: BufferedPipe) throws -> (String) {
-        #if DEBUG
-            print("DEBUG: Expecting label '\(label)'")
-        #endif
         let splitted = try readline(from: pipe).components(separatedBy: ": ")
         guard splitted.count == 2 else {
-            #if DEBUG
-                print("ERROR: \(readError())")
-            #endif
-            throw RemoteError.valueExpected
+            throw RemoteError.valueExpected(readError())
         }
         guard label == splitted[0] else {
-            #if DEBUG
-                print("ERROR: \(readError())")
-            #endif
             throw RemoteError.unexpectedValueLabel(splitted[0])
         }
         return splitted[1]
@@ -132,35 +105,20 @@ class Remote {
         while true {
             if let eol = pipe.buffer.index(of: 10) {
                 defer {
-                    // Slicing of Data is broken on Linux... workaround by creating new Data.
-                    pipe.buffer = Data(pipe.buffer.dropFirst(eol - pipe.buffer.startIndex + 1))
+                    let lineLength = eol - pipe.buffer.startIndex + 1
+                    pipe.buffer.removeFirst(lineLength)
                 }
                 guard let line = String(data: Data(pipe.buffer[pipe.buffer.startIndex..<eol]), encoding: .utf8) else {
                     throw RemoteError.decodingError
                 }
                 return line
-            } else if pipe.buffer.count > 0 {
-                #if DEBUG
-                    print("DEBUG: Available buffer, but without a newline")
-                #endif
             }
-
             let availableData = pipe.fileHandleForReading.availableData
             pipe.buffer.append(availableData)
 
-            #if DEBUG
-                if let availableOutput = String(data: availableData, encoding: .utf8) {
-                    for line in availableOutput.characters.split(separator: "\n") {
-                        print("DEBUG: < \(String(line))")
-                    }
-                } else {
-                    print("DEBUG: Could not decode output")
-                }
-            #endif
-
             if availableData.count == 0 && !process.isRunning {
                 // No more data coming and buffer doesn't contain a newline
-                throw RemoteError.unexpectedExit
+                throw RemoteError.unexpectedExit(readError())
             }
         }
     }
@@ -227,7 +185,7 @@ class RemoteServer: Remote {
         }
         super.init(process: process)
 
-        verificationKey = try Data(hex: read(label: "v", from: error))
+        verificationKey = try Data(hex: read(label: "v", from: output))
     }
 
     /// Get server's challenge
@@ -238,7 +196,7 @@ class RemoteServer: Remote {
     func getChallenge(publicKey A: Data) throws -> (salt: Data, publicKey: Data) {
         do {
             try write(prompt: "A", line: A.hex)
-            privateKey = try Data(hex: try read(label: "b", from: error))
+            privateKey = try Data(hex: try read(label: "b", from: output))
             salt = try Data(hex: try read(label: "s", from: output))
             publicKey = try Data(hex: try read(label: "B", from: output))
             return (salt!, publicKey!)
@@ -255,7 +213,7 @@ class RemoteServer: Remote {
     func verifySession(keyProof M: Data) throws -> Data {
         do {
             try write(prompt: "M", line: M.hex)
-            expectedM = try Data(hex: try read(label: "expected M", from: error))
+            expectedM = try Data(hex: try read(label: "expected M", from: output))
             return try Data(hex: try read(label: "HAMK", from: output))
         } catch RemoteError.unexpectedExit {
             throw readError()
@@ -267,7 +225,7 @@ class RemoteServer: Remote {
     /// - Returns: session key
     /// - Throws: on I/O Error
     func getSessionKey() throws -> Data {
-        return try Data(hex: try read(label: "K", from: error))
+        return try Data(hex: try read(label: "K", from: output))
     }
 }
 
@@ -312,7 +270,7 @@ class RemoteClient: Remote {
         }
         super.init(process: process)
 
-        self.privateKey = try Data(hex: try read(label: "a", from: error))
+        self.privateKey = try Data(hex: try read(label: "a", from: output))
     }
 
     /// Read public key from stdout.
@@ -353,6 +311,6 @@ class RemoteClient: Remote {
     /// - Returns: session key (K)
     /// - Throws: on I/O Error
     func getSessionKey() throws -> Data {
-        return try Data(hex: try read(label: "K", from: error))
+        return try Data(hex: try read(label: "K", from: output))
     }
 }
