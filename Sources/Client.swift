@@ -12,7 +12,8 @@ public class Client {
     let algorithm: Digest.Algorithm
 
     let username: String
-    let password: String
+    var password: String? = nil
+    var precomputed_x: BigUInt? = nil
 
     var HAMK: Data? = nil
     var K: Data? = nil
@@ -23,7 +24,23 @@ public class Client {
     /// is also available.
     public private(set) var isAuthenticated = false
 
-    /// Initialize the Client SRP party.
+    private static func commonInit(
+        group: Group = .N2048,
+        privateKey: Data? = nil)
+        -> (BigUInt, BigUInt) {
+
+        var srp_a: BigUInt
+        if let privateKey = privateKey {
+            srp_a = BigUInt(privateKey)
+        } else {
+            srp_a = BigUInt(Data(bytes: try! Random.generate(byteCount: 128)))
+        }
+        // A = g^a % N
+        let srp_A = group.g.power(srp_a, modulus: group.N)
+        return (srp_a, srp_A)
+    }
+    
+    /// Initialize the Client SRP party with a password.
     ///
     /// - Parameters:
     ///   - username: user's username.
@@ -31,11 +48,11 @@ public class Client {
     ///   - group: which `Group` to use, must be the same for the
     ///       server as well as the pre-stored verificationKey.
     ///   - algorithm: which `Digest.Algorithm` to use, again this
-    ///       must be the same for the server as well as the pre-stored 
+    ///       must be the same for the server as well as the pre-stored
     ///       verificationKey.
-    ///   - privateKey: (optional) custom private key (a); if providing 
-    ///       the private key of the `Client`, make sure to provide a 
-    ///       good random key of at least 32 bytes. Default is to 
+    ///   - privateKey: (optional) custom private key (a); if providing
+    ///       the private key of the `Client`, make sure to provide a
+    ///       good random key of at least 32 bytes. Default is to
     ///       generate a private key of 128 bytes. You MUST not re-use
     ///       the private key between sessions.
     public init(
@@ -45,18 +62,40 @@ public class Client {
         algorithm: Digest.Algorithm = .sha1,
         privateKey: Data? = nil)
     {
-        self.group = group
-        self.algorithm = algorithm
         self.username = username
         self.password = password
-
-        if let privateKey = privateKey {
-            a = BigUInt(privateKey)
-        } else {
-            a = BigUInt(Data(bytes: try! Random.generate(byteCount: 128)))
-        }
-        // A = g^a % N
-        A = group.g.power(a, modulus: group.N)
+        self.group = group
+        self.algorithm = algorithm
+        (a, A) = Client.commonInit(group: group, privateKey: privateKey)
+    }
+    
+    /// Initialize the Client SRP party with a precomputed x.
+    ///
+    /// - Parameters:
+    ///   - username: user's username.
+    ///   - precomputed_x: precomputed SRP x.
+    ///   - group: which `Group` to use, must be the same for the
+    ///       server as well as the pre-stored verificationKey.
+    ///   - algorithm: which `Digest.Algorithm` to use, again this
+    ///       must be the same for the server as well as the pre-stored
+    ///       verificationKey.
+    ///   - privateKey: (optional) custom private key (a); if providing
+    ///       the private key of the `Client`, make sure to provide a
+    ///       good random key of at least 32 bytes. Default is to
+    ///       generate a private key of 128 bytes. You MUST not re-use
+    ///       the private key between sessions.
+    public init(
+        username: String,
+        precomputed_x: BigUInt,
+        group: Group = .N2048,
+        algorithm: Digest.Algorithm = .sha1,
+        privateKey: Data? = nil)
+    {
+        self.username = username
+        self.precomputed_x = precomputed_x
+        self.group = group
+        self.algorithm = algorithm
+        (a, A) = Client.commonInit(group: group, privateKey: privateKey)
     }
 
     /// Starts authentication. This method is a no-op.
@@ -89,7 +128,7 @@ public class Client {
 
         let u = calculate_u(group: group, algorithm: algorithm, A: publicKey, B: serverPublicKey)
         let k = calculate_k(group: group, algorithm: algorithm)
-        let x = calculate_x(algorithm: algorithm, salt: salt, username: username, password: password)
+        let x = self.precomputed_x ?? calculate_x(algorithm: algorithm, salt: salt, username: username, password: password!)
         let v = calculate_v(group: group, x: x)
 
         // shared secret

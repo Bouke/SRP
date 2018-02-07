@@ -29,6 +29,15 @@ public func createSaltedVerificationKey(
 {
     let salt = salt ?? Data(bytes: try! Random.generate(byteCount: 16))
     let x = calculate_x(algorithm: algorithm, salt: salt, username: username, password: password)
+    return createSaltedVerificationKey(from: x, group: group)
+}
+
+public func createSaltedVerificationKey(
+    from x: BigUInt,
+    salt: Data? = nil,
+    group: Group = .N2048)
+    -> (salt: Data, verificationKey: Data) {
+    let salt = salt ?? Data(bytes: try! Random.generate(byteCount: 16))
     let v = calculate_v(group: group, x: x)
     return (salt, v.serialize())
 }
