@@ -29,7 +29,7 @@ public func createSaltedVerificationKey(
 {
     let salt = salt ?? Data(bytes: try! Random.generate(byteCount: 16))
     let x = calculate_x(algorithm: algorithm, salt: salt, username: username, password: password)
-    return createSaltedVerificationKey(from: x, group: group)
+    return createSaltedVerificationKey(from: x, salt: salt, group: group)
 }
 
 public func createSaltedVerificationKey(
