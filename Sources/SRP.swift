@@ -29,6 +29,39 @@ public func createSaltedVerificationKey(
 {
     let salt = salt ?? Data(bytes: try! Random.generate(byteCount: 16))
     let x = calculate_x(algorithm: algorithm, salt: salt, username: username, password: password)
+    return createSaltedVerificationKey(from: x, salt: salt, group: group)
+}
+
+/// Creates the salted verification key based on a precomputed SRP x value.
+/// Only the salt and verification key need to be stored on the
+/// server, there's no need to keep the plain-text password.
+///
+/// Keep the verification key private, as it can be used to brute-force
+/// the password from.
+///
+/// - Parameters:
+///   - x: precomputed SRP x
+///   - salt: (optional) custom salt value; if providing a salt, make sure to
+///       provide a good random salt of at least 16 bytes. Default is to
+///       generate a salt of 16 bytes.
+///   - group: `Group` parameters; default is 2048-bits group.
+/// - Returns: salt (s) and verification key (v)
+public func createSaltedVerificationKey(
+    from x: Data,
+    salt: Data? = nil,
+    group: Group = .N2048)
+    -> (salt: Data, verificationKey: Data)
+{
+    return createSaltedVerificationKey(from: BigUInt(x), salt: salt, group: group)
+}
+
+func createSaltedVerificationKey(
+    from x: BigUInt,
+    salt: Data? = nil,
+    group: Group = .N2048)
+    -> (salt: Data, verificationKey: Data)
+{
+    let salt = salt ?? Data(bytes: try! Random.generate(byteCount: 16))
     let v = calculate_v(group: group, x: x)
     return (salt, v.serialize())
 }

@@ -1,6 +1,7 @@
 import Foundation
 import Cryptor
 import SRP
+import BigInt
 import XCTest
 
 class ReadmeTests: XCTestCase {
@@ -10,9 +11,25 @@ class ReadmeTests: XCTestCase {
             "alice": createSaltedVerificationKey(username: "alice", password: "password123"),
             "bob": createSaltedVerificationKey(username: "bob", password: "qwerty12345"),
         ]
-
         // Alice wants to authenticate, she sends her username to the server.
         let client = Client(username: "alice", password: "password123")
+        try runCommonTest(client: client, userStore: userStore)
+    }
+    
+    func testGivenSRPX() throws {
+        // This is a database of users, along with their salted verification keys
+        let userStore: [String: (salt: Data, verificationKey: Data)] = [
+            "alice": createSaltedVerificationKey(from: Data("12345".utf8)),
+            "bob": createSaltedVerificationKey(from: Data("67890".utf8)),
+            ]
+        
+        // Alice wants to authenticate, she sends her username to the server.
+        let client = Client(username: "alice", precomputedX: Data("12345".utf8))
+        try runCommonTest(client: client, userStore: userStore)
+    }
+    
+    func runCommonTest(client: Client, userStore: [String: (salt: Data, verificationKey: Data)]) throws {
+        // Alice wants to authenticate
         let (username, clientPublicKey) = client.startAuthentication()
 
         let server = Server(
@@ -45,6 +62,7 @@ class ReadmeTests: XCTestCase {
     static var allTests : [(String, (ReadmeTests) -> () throws -> Void)] {
         return [
             ("test", test),
+            ("testGivenSRPX", testGivenSRPX),
         ]
     }
 }

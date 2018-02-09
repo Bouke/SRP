@@ -12,7 +12,8 @@ public class Client {
     let algorithm: Digest.Algorithm
 
     let username: String
-    let password: String
+    var password: String? = nil
+    var precomputedX: BigUInt? = nil
 
     var HAMK: Data? = nil
     var K: Data? = nil
@@ -23,33 +24,15 @@ public class Client {
     /// is also available.
     public private(set) var isAuthenticated = false
 
-    /// Initialize the Client SRP party.
-    ///
-    /// - Parameters:
-    ///   - username: user's username.
-    ///   - password: user's password.
-    ///   - group: which `Group` to use, must be the same for the
-    ///       server as well as the pre-stored verificationKey.
-    ///   - algorithm: which `Digest.Algorithm` to use, again this
-    ///       must be the same for the server as well as the pre-stored 
-    ///       verificationKey.
-    ///   - privateKey: (optional) custom private key (a); if providing 
-    ///       the private key of the `Client`, make sure to provide a 
-    ///       good random key of at least 32 bytes. Default is to 
-    ///       generate a private key of 128 bytes. You MUST not re-use
-    ///       the private key between sessions.
-    public init(
+    private init(
         username: String,
-        password: String,
         group: Group = .N2048,
         algorithm: Digest.Algorithm = .sha1,
         privateKey: Data? = nil)
     {
+        self.username = username
         self.group = group
         self.algorithm = algorithm
-        self.username = username
-        self.password = password
-
         if let privateKey = privateKey {
             a = BigUInt(privateKey)
         } else {
@@ -57,6 +40,58 @@ public class Client {
         }
         // A = g^a % N
         A = group.g.power(a, modulus: group.N)
+    }
+    
+    /// Initialize the Client SRP party with a password.
+    ///
+    /// - Parameters:
+    ///   - username: user's username.
+    ///   - password: user's password.
+    ///   - group: which `Group` to use, must be the same for the
+    ///       server as well as the pre-stored verificationKey.
+    ///   - algorithm: which `Digest.Algorithm` to use, again this
+    ///       must be the same for the server as well as the pre-stored
+    ///       verificationKey.
+    ///   - privateKey: (optional) custom private key (a); if providing
+    ///       the private key of the `Client`, make sure to provide a
+    ///       good random key of at least 32 bytes. Default is to
+    ///       generate a private key of 128 bytes. You MUST not re-use
+    ///       the private key between sessions.
+    public convenience init(
+        username: String,
+        password: String,
+        group: Group = .N2048,
+        algorithm: Digest.Algorithm = .sha1,
+        privateKey: Data? = nil)
+    {
+        self.init(username: username, group: group, algorithm: algorithm, privateKey: privateKey)
+        self.password = password
+    }
+    
+    /// Initialize the Client SRP party with a precomputed x.
+    ///
+    /// - Parameters:
+    ///   - username: user's username.
+    ///   - precomputedX: precomputed SRP x.
+    ///   - group: which `Group` to use, must be the same for the
+    ///       server as well as the pre-stored verificationKey.
+    ///   - algorithm: which `Digest.Algorithm` to use, again this
+    ///       must be the same for the server as well as the pre-stored
+    ///       verificationKey.
+    ///   - privateKey: (optional) custom private key (a); if providing
+    ///       the private key of the `Client`, make sure to provide a
+    ///       good random key of at least 32 bytes. Default is to
+    ///       generate a private key of 128 bytes. You MUST not re-use
+    ///       the private key between sessions.
+    public convenience init(
+        username: String,
+        precomputedX: Data,
+        group: Group = .N2048,
+        algorithm: Digest.Algorithm = .sha1,
+        privateKey: Data? = nil)
+    {
+        self.init(username: username, group: group, algorithm: algorithm, privateKey: privateKey)
+        self.precomputedX = BigUInt(precomputedX)
     }
 
     /// Starts authentication. This method is a no-op.
@@ -89,7 +124,7 @@ public class Client {
 
         let u = calculate_u(group: group, algorithm: algorithm, A: publicKey, B: serverPublicKey)
         let k = calculate_k(group: group, algorithm: algorithm)
-        let x = calculate_x(algorithm: algorithm, salt: salt, username: username, password: password)
+        let x = self.precomputedX ?? calculate_x(algorithm: algorithm, salt: salt, username: username, password: password!)
         let v = calculate_v(group: group, x: x)
 
         // shared secret
