@@ -10,22 +10,21 @@ class ReadmeTests: XCTestCase {
         let userStore: [String: (salt: Data, verificationKey: Data)] = [
             "alice": createSaltedVerificationKey(username: "alice", password: "password123"),
             "bob": createSaltedVerificationKey(username: "bob", password: "qwerty12345"),
-            ]
-        
+        ]
         // Alice wants to authenticate, she sends her username to the server.
         let client = Client(username: "alice", password: "password123")
         try runCommonTest(client: client, userStore: userStore)
     }
     
-    func testGivenSrpX() throws {
+    func testGivenSRPX() throws {
         // This is a database of users, along with their salted verification keys
         let userStore: [String: (salt: Data, verificationKey: Data)] = [
-            "alice": createSaltedVerificationKey(from: BigUInt(12345)),
-            "bob": createSaltedVerificationKey(from: BigUInt(67890)),
+            "alice": createSaltedVerificationKey(from: Data("12345".utf8)),
+            "bob": createSaltedVerificationKey(from: Data("67890".utf8)),
             ]
         
         // Alice wants to authenticate, she sends her username to the server.
-        let client = Client(username: "alice", precomputed_x: BigUInt(12345))
+        let client = Client(username: "alice", precomputedX: Data("12345".utf8))
         try runCommonTest(client: client, userStore: userStore)
     }
     
@@ -63,7 +62,7 @@ class ReadmeTests: XCTestCase {
     static var allTests : [(String, (ReadmeTests) -> () throws -> Void)] {
         return [
             ("test", test),
-            ("testGivenSrpX", testGivenSrpX),
+            ("testGivenSRPX", testGivenSRPX),
         ]
     }
 }

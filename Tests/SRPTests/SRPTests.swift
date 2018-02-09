@@ -14,12 +14,12 @@ class SRPTests: XCTestCase {
         runTest(group: .N8192, algorithm: .sha1, username: "alice", password: "password123")
         
         // test given precomputed SRP x
-        runGivenSrpXTest(group: .N1024, algorithm: .sha1, username: "alice")
-        runGivenSrpXTest(group: .N2048, algorithm: .sha1, username: "alice")
-        runGivenSrpXTest(group: .N3072, algorithm: .sha1, username: "alice")
-        runGivenSrpXTest(group: .N4096, algorithm: .sha1, username: "alice")
-        runGivenSrpXTest(group: .N6144, algorithm: .sha1, username: "alice")
-        runGivenSrpXTest(group: .N8192, algorithm: .sha1, username: "alice")
+        runGivenSRPXTest(group: .N1024, algorithm: .sha1, username: "alice")
+        runGivenSRPXTest(group: .N2048, algorithm: .sha1, username: "alice")
+        runGivenSRPXTest(group: .N3072, algorithm: .sha1, username: "alice")
+        runGivenSRPXTest(group: .N4096, algorithm: .sha1, username: "alice")
+        runGivenSRPXTest(group: .N6144, algorithm: .sha1, username: "alice")
+        runGivenSRPXTest(group: .N8192, algorithm: .sha1, username: "alice")
     }
 
     func testSHA256() {
@@ -31,12 +31,12 @@ class SRPTests: XCTestCase {
         runTest(group: .N8192, algorithm: .sha256, username: "alice", password: "password123")
         
         // test given precomputed SRP x
-        runGivenSrpXTest(group: .N1024, algorithm: .sha256, username: "alice")
-        runGivenSrpXTest(group: .N2048, algorithm: .sha256, username: "alice")
-        runGivenSrpXTest(group: .N3072, algorithm: .sha256, username: "alice")
-        runGivenSrpXTest(group: .N4096, algorithm: .sha256, username: "alice")
-        runGivenSrpXTest(group: .N6144, algorithm: .sha256, username: "alice")
-        runGivenSrpXTest(group: .N8192, algorithm: .sha256, username: "alice")
+        runGivenSRPXTest(group: .N1024, algorithm: .sha256, username: "alice")
+        runGivenSRPXTest(group: .N2048, algorithm: .sha256, username: "alice")
+        runGivenSRPXTest(group: .N3072, algorithm: .sha256, username: "alice")
+        runGivenSRPXTest(group: .N4096, algorithm: .sha256, username: "alice")
+        runGivenSRPXTest(group: .N6144, algorithm: .sha256, username: "alice")
+        runGivenSRPXTest(group: .N8192, algorithm: .sha256, username: "alice")
     }
 
     func testCustomGroupParameters() {
@@ -45,8 +45,8 @@ class SRPTests: XCTestCase {
         runTest(group: group, algorithm: .sha256, username: "alice", password: "password123")
         
         // test given precomputed SRP x
-        runGivenSrpXTest(group: group, algorithm: .sha1, username: "alice")
-        runGivenSrpXTest(group: group, algorithm: .sha256, username: "alice")
+        runGivenSRPXTest(group: group, algorithm: .sha1, username: "alice")
+        runGivenSRPXTest(group: group, algorithm: .sha256, username: "alice")
     }
 
     func testUtf8() {
@@ -54,7 +54,7 @@ class SRPTests: XCTestCase {
         runTest(group: .N1024, algorithm: .sha1, username: "bõūkę", password: "😅")
         
         // test given precomputed SRP x
-        runGivenSrpXTest(group: .N1024, algorithm: .sha1, username: "bõūkę")
+        runGivenSRPXTest(group: .N1024, algorithm: .sha1, username: "bõūkę")
     }
 
     func runTest(
@@ -71,13 +71,13 @@ class SRPTests: XCTestCase {
          * authentication process.
          */
         let (salt, verificationKey) = createSaltedVerificationKey(username: username, password: password, group: group, algorithm: algorithm)
-        
+
         // Begin authentication process
         let client = Client(username: username, password: password, group: group, algorithm: algorithm)
         runCommonTest(group: group, algorithm: algorithm, username: username, salt: salt, verificationKey: verificationKey, client: client)
     }
     
-    func runGivenSrpXTest(
+    func runGivenSRPXTest(
         group: Group,
         algorithm: Digest.Algorithm,
         username: String,
@@ -88,11 +88,11 @@ class SRPTests: XCTestCase {
          * key must be stored by the server-side application for use during the
          * authentication process.
          */
-        let precomputed_x = BigUInt(12345)
-        let (salt, verificationKey) = createSaltedVerificationKey(from: precomputed_x, group: group)
+        let precomputedX: Data = Data("12345".utf8)
+        let (salt, verificationKey) = createSaltedVerificationKey(from: precomputedX, group: group)
         
         // Begin authentication process
-        let client = Client(username: username, precomputed_x: precomputed_x, group: group, algorithm: algorithm)
+        let client = Client(username: username, precomputedX: precomputedX, group: group, algorithm: algorithm)
         runCommonTest(group: group, algorithm: algorithm, username: username, salt: salt, verificationKey: verificationKey, client: client)
     }
     
@@ -173,10 +173,10 @@ class SRPTests: XCTestCase {
             XCTFail("Incorrect error thrown: \(error)")
         }
     }
-    
-    func testClientGivenSrpXAborts() {
-        let precomputed_x = BigUInt(12345)
-        let client = Client(username: "alice", precomputed_x: precomputed_x)
+
+    func testClientGivenSRPXAborts() {
+        let precomputedX = Data("12345".utf8)
+        let client = Client(username: "alice", precomputedX: precomputedX)
         do {
             _ = try client.processChallenge(
                 salt: try! Data(hex: String(repeating: "0", count: 16)),
@@ -204,8 +204,8 @@ class SRPTests: XCTestCase {
         }
     }
     
-    func testServerGivenSrpXAborts() {
-        let (salt, verificationKey) = createSaltedVerificationKey(from: BigUInt(12345))
+    func testServerGivenSRPXAborts() {
+        let (salt, verificationKey) = createSaltedVerificationKey(from: Data("12345".utf8))
         let server = Server(username: "alice", salt: salt, verificationKey: verificationKey)
         do {
             _ = try server.verifySession(
@@ -226,9 +226,9 @@ class SRPTests: XCTestCase {
             ("testCustomGroupParameters", testCustomGroupParameters),
             ("testUtf8", testUtf8),
             ("testClientAborts", testClientAborts),
-            ("testClientGivenSrpXAborts", testClientGivenSrpXAborts),
-            ("testServerAborts", testServerGivenSrpXAborts),
-            ("testServerGivenSrpXAborts", testServerGivenSrpXAborts),
+            ("testClientGivenSRPXAborts", testClientGivenSRPXAborts),
+            ("testServerAborts", testServerGivenSRPXAborts),
+            ("testServerGivenSRPXAborts", testServerGivenSRPXAborts),
         ]
     }
 }
