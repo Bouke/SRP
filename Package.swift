@@ -9,7 +9,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/IBM-Swift/BlueCryptor.git", from: "0.8.27"),
-        .package(url: "https://github.com/attaswift/BigInt.git", from: "3.0.2"),
+        .package(url: "https://github.com/Boilertalk/BigInt.swift.git", from: "1.0.0"),
     ],
     targets: [
         .target(name: "SRP", dependencies: ["Cryptor", "BigInt"], path: "Sources"),
