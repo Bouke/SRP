@@ -67,6 +67,8 @@ public class Server {
         v = BigUInt(verificationKey)
         let N = group.N
         let g = group.g
+        // B = (k*v + g^b) % N
+        // BigInt library doesnt have x^y but x^y%z instead, so we calculate B:
         // B = (k*v + g^b % N) % N
         B = ((k * v + g.power(b, modulus: N)) % N)
     }
