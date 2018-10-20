@@ -2,7 +2,6 @@ import Foundation
 import BigInt
 import Cryptor
 
-
 /// Creates the salted verification key based on a user's username and
 /// password. Only the salt and verification key need to be stored on the
 /// server, there's no need to keep the plain-text password. 

@@ -12,7 +12,7 @@ public class Server {
     let username: String
 
     let v: BigUInt
-    var K: Data? = nil
+    var K: Data?
 
     let group: Group
     let algorithm: Digest.Algorithm

@@ -12,11 +12,11 @@ public class Client {
     let algorithm: Digest.Algorithm
 
     let username: String
-    var password: String? = nil
-    var precomputedX: BigUInt? = nil
+    var password: String?
+    var precomputedX: BigUInt?
 
-    var HAMK: Data? = nil
-    var K: Data? = nil
+    var HAMK: Data?
+    var K: Data?
 
     /// Whether the session is authenticated, i.e. the password
     /// was verified by the server and proof of a valid session
@@ -41,7 +41,7 @@ public class Client {
         // A = g^a % N
         A = group.g.power(a, modulus: group.N)
     }
-    
+
     /// Initialize the Client SRP party with a password.
     ///
     /// - Parameters:
@@ -67,7 +67,7 @@ public class Client {
         self.init(username: username, group: group, algorithm: algorithm, privateKey: privateKey)
         self.password = password
     }
-    
+
     /// Initialize the Client SRP party with a precomputed x.
     ///
     /// - Parameters:

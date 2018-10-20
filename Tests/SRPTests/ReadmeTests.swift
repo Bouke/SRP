@@ -5,29 +5,37 @@ import BigInt
 import XCTest
 
 class ReadmeTests: XCTestCase {
+    static var allTests: [(String, (ReadmeTests) -> () throws -> Void)] {
+        return [
+            ("test", test),
+            ("testGivenSRPX", testGivenSRPX),
+            ("testLinuxTestSuiteIncludesAllTests", testLinuxTestSuiteIncludesAllTests)
+        ]
+    }
+
     func test() throws {
         // This is a database of users, along with their salted verification keys
         let userStore: [String: (salt: Data, verificationKey: Data)] = [
             "alice": createSaltedVerificationKey(username: "alice", password: "password123"),
-            "bob": createSaltedVerificationKey(username: "bob", password: "qwerty12345"),
+            "bob": createSaltedVerificationKey(username: "bob", password: "qwerty12345")
         ]
         // Alice wants to authenticate, she sends her username to the server.
         let client = Client(username: "alice", password: "password123")
         try runCommonTest(client: client, userStore: userStore)
     }
-    
+
     func testGivenSRPX() throws {
         // This is a database of users, along with their salted verification keys
         let userStore: [String: (salt: Data, verificationKey: Data)] = [
             "alice": createSaltedVerificationKey(from: Data("12345".utf8)),
-            "bob": createSaltedVerificationKey(from: Data("67890".utf8)),
+            "bob": createSaltedVerificationKey(from: Data("67890".utf8))
             ]
-        
+
         // Alice wants to authenticate, she sends her username to the server.
         let client = Client(username: "alice", precomputedX: Data("12345".utf8))
         try runCommonTest(client: client, userStore: userStore)
     }
-    
+
     func runCommonTest(client: Client, userStore: [String: (salt: Data, verificationKey: Data)]) throws {
         // Alice wants to authenticate
         let (username, clientPublicKey) = client.startAuthentication()
@@ -59,10 +67,16 @@ class ReadmeTests: XCTestCase {
         assert(server.sessionKey == client.sessionKey)
     }
 
-    static var allTests : [(String, (ReadmeTests) -> () throws -> Void)] {
-        return [
-            ("test", test),
-            ("testGivenSRPX", testGivenSRPX),
-        ]
+    // from: https://oleb.net/blog/2017/03/keeping-xctest-in-sync/#appendix-code-generation-with-sourcery
+    func testLinuxTestSuiteIncludesAllTests() {
+        #if os(macOS) || os(iOS) || os(tvOS) || os(watchOS)
+        let thisClass = type(of: self)
+        let linuxCount = thisClass.allTests.count
+        let darwinCount = Int(thisClass
+            .defaultTestSuite.testCaseCount)
+        XCTAssertEqual(linuxCount,
+                       darwinCount,
+                       "\(darwinCount - linuxCount) tests are missing from allTests")
+        #endif
     }
 }

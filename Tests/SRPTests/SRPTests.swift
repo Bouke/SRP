@@ -5,6 +5,20 @@ import BigInt
 import XCTest
 
 class SRPTests: XCTestCase {
+    static var allTests: [(String, (SRPTests) -> () throws -> Void)] {
+        return [
+            ("testSHA1", testSHA1),
+            ("testSHA256", testSHA256),
+            ("testCustomGroupParameters", testCustomGroupParameters),
+            ("testUtf8", testUtf8),
+            ("testClientAborts", testClientAborts),
+            ("testClientGivenSRPXAborts", testClientGivenSRPXAborts),
+            ("testServerAborts", testServerGivenSRPXAborts),
+            ("testServerGivenSRPXAborts", testServerGivenSRPXAborts),
+            ("testLinuxTestSuiteIncludesAllTests", testLinuxTestSuiteIncludesAllTests)
+        ]
+    }
+
     func testSHA1() {
         runTest(group: .N1024, algorithm: .sha1, username: "alice", password: "password123")
         runTest(group: .N2048, algorithm: .sha1, username: "alice", password: "password123")
@@ -12,7 +26,7 @@ class SRPTests: XCTestCase {
         runTest(group: .N4096, algorithm: .sha1, username: "alice", password: "password123")
         runTest(group: .N6144, algorithm: .sha1, username: "alice", password: "password123")
         runTest(group: .N8192, algorithm: .sha1, username: "alice", password: "password123")
-        
+
         // test given precomputed SRP x
         runGivenSRPXTest(group: .N1024, algorithm: .sha1, username: "alice")
         runGivenSRPXTest(group: .N2048, algorithm: .sha1, username: "alice")
@@ -29,7 +43,7 @@ class SRPTests: XCTestCase {
         runTest(group: .N4096, algorithm: .sha256, username: "alice", password: "password123")
         runTest(group: .N6144, algorithm: .sha256, username: "alice", password: "password123")
         runTest(group: .N8192, algorithm: .sha256, username: "alice", password: "password123")
-        
+
         // test given precomputed SRP x
         runGivenSRPXTest(group: .N1024, algorithm: .sha256, username: "alice")
         runGivenSRPXTest(group: .N2048, algorithm: .sha256, username: "alice")
@@ -43,7 +57,7 @@ class SRPTests: XCTestCase {
         let group = Group(prime: "13", generator: "7")!
         runTest(group: group, algorithm: .sha1, username: "alice", password: "password123")
         runTest(group: group, algorithm: .sha256, username: "alice", password: "password123")
-        
+
         // test given precomputed SRP x
         runGivenSRPXTest(group: group, algorithm: .sha1, username: "alice")
         runGivenSRPXTest(group: group, algorithm: .sha256, username: "alice")
@@ -52,7 +66,7 @@ class SRPTests: XCTestCase {
     func testUtf8() {
         runTest(group: .N1024, algorithm: .sha1, username: "bõūkę", password: "tėšt")
         runTest(group: .N1024, algorithm: .sha1, username: "bõūkę", password: "😅")
-        
+
         // test given precomputed SRP x
         runGivenSRPXTest(group: .N1024, algorithm: .sha1, username: "bõūkę")
     }
@@ -76,7 +90,7 @@ class SRPTests: XCTestCase {
         let client = Client(username: username, password: password, group: group, algorithm: algorithm)
         runCommonTest(group: group, algorithm: algorithm, username: username, salt: salt, verificationKey: verificationKey, client: client)
     }
-    
+
     func runGivenSRPXTest(
         group: Group,
         algorithm: Digest.Algorithm,
@@ -90,12 +104,12 @@ class SRPTests: XCTestCase {
          */
         let precomputedX: Data = Data("12345".utf8)
         let (salt, verificationKey) = createSaltedVerificationKey(from: precomputedX, group: group)
-        
+
         // Begin authentication process
         let client = Client(username: username, precomputedX: precomputedX, group: group, algorithm: algorithm)
         runCommonTest(group: group, algorithm: algorithm, username: username, salt: salt, verificationKey: verificationKey, client: client)
     }
-    
+
     func runCommonTest(
         group: Group,
         algorithm: Digest.Algorithm,
@@ -203,7 +217,7 @@ class SRPTests: XCTestCase {
             XCTFail("Incorrect error thrown: \(error)")
         }
     }
-    
+
     func testServerGivenSRPXAborts() {
         let (salt, verificationKey) = createSaltedVerificationKey(from: Data("12345".utf8))
         let server = Server(username: "alice", salt: salt, verificationKey: verificationKey)
@@ -219,16 +233,16 @@ class SRPTests: XCTestCase {
         }
     }
 
-    static var allTests : [(String, (SRPTests) -> () throws -> Void)] {
-        return [
-            ("testSHA1", testSHA1),
-            ("testSHA256", testSHA256),
-            ("testCustomGroupParameters", testCustomGroupParameters),
-            ("testUtf8", testUtf8),
-            ("testClientAborts", testClientAborts),
-            ("testClientGivenSRPXAborts", testClientGivenSRPXAborts),
-            ("testServerAborts", testServerGivenSRPXAborts),
-            ("testServerGivenSRPXAborts", testServerGivenSRPXAborts),
-        ]
+    // from: https://oleb.net/blog/2017/03/keeping-xctest-in-sync/#appendix-code-generation-with-sourcery
+    func testLinuxTestSuiteIncludesAllTests() {
+        #if os(macOS) || os(iOS) || os(tvOS) || os(watchOS)
+        let thisClass = type(of: self)
+        let linuxCount = thisClass.allTests.count
+        let darwinCount = Int(thisClass
+            .defaultTestSuite.testCaseCount)
+        XCTAssertEqual(linuxCount,
+                       darwinCount,
+                       "\(darwinCount - linuxCount) tests are missing from allTests")
+        #endif
     }
 }

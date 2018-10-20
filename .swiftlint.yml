@@ -1,0 +1,37 @@
+disabled_rules:
+  - force_try
+  - function_body_length
+  - function_parameter_count
+  - line_length
+  - opening_brace
+included:
+  - Sources
+  - Tests
+identifier_name:
+  excluded:
+    - a
+    - A
+    - b
+    - B
+    - g
+    - H
+    - HI
+    - HN_xor_Hg
+    - M
+    - k
+    - K
+    - K0
+    - K1
+    - N
+    - N1024
+    - N2048
+    - N1536
+    - N3072
+    - N4096
+    - N6144
+    - N8192
+    - s
+    - S
+    - u
+    - v
+    - x

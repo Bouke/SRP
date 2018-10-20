@@ -5,6 +5,16 @@ import XCTest
 @testable import SRP
 
 class PySrptoolsTests: XCTestCase {
+    static var allTests: [(String, (PySrptoolsTests) -> () throws -> Void)] {
+        return [
+            ("testClient", testClient),
+            ("testClientUtf8", testClientUtf8),
+            ("testServer", testServer),
+            ("testServerUtf8", testServerUtf8),
+            ("testLinuxTestSuiteIncludesAllTests", testLinuxTestSuiteIncludesAllTests)
+        ]
+    }
+
     func testClient() {
         guard ProcessInfo.processInfo.environment["PYTHON"] != nil else {
             return NSLog("Skipped integration test at \(#file):\(#line)")
@@ -69,7 +79,7 @@ class PySrptoolsTests: XCTestCase {
                 "clientPublicKey: \(client.publicKey.hex)",
                 "expected client M: \(server.expectedM?.hex ?? "N/A")",
                 "expected server HAMK: \(client.HAMK?.hex ?? "N/A")",
-                "clientK: \(client.K?.hex ?? "N/A")",
+                "clientK: \(client.K?.hex ?? "N/A")"
             ]
             return infos.joined(separator: "\n")
         }
@@ -195,7 +205,7 @@ class PySrptoolsTests: XCTestCase {
                 "serverPrivateKey: \(server.privateKey.hex)",
                 "serverPublicKey: \(server.publicKey.hex)",
                 "clientPrivateKey: \(client.privateKey?.hex ?? "N/A")",
-                "clientPublicKey: \(client.publicKey?.hex ?? "N/A")",
+                "clientPublicKey: \(client.publicKey?.hex ?? "N/A")"
             ]
             return infos.joined(separator: ", ")
         }
@@ -254,12 +264,16 @@ class PySrptoolsTests: XCTestCase {
         XCTAssertEqual(server.sessionKey, clientSessionKey, "Session keys not equal")
     }
 
-    static var allTests : [(String, (PySrptoolsTests) -> () throws -> Void)] {
-        return [
-            ("testClient", testClient),
-            ("testClientUtf8", testClientUtf8),
-            ("testServer", testServer),
-            ("testServerUtf8", testServerUtf8),
-        ]
+    // from: https://oleb.net/blog/2017/03/keeping-xctest-in-sync/#appendix-code-generation-with-sourcery
+    func testLinuxTestSuiteIncludesAllTests() {
+        #if os(macOS) || os(iOS) || os(tvOS) || os(watchOS)
+        let thisClass = type(of: self)
+        let linuxCount = thisClass.allTests.count
+        let darwinCount = Int(thisClass
+            .defaultTestSuite.testCaseCount)
+        XCTAssertEqual(linuxCount,
+                       darwinCount,
+                       "\(darwinCount - linuxCount) tests are missing from allTests")
+        #endif
     }
 }
