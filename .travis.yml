@@ -6,7 +6,9 @@ env:
   - INTEGRATION_TESTS=true
 language: generic
 dist: trusty
-osx_image: xcode9
+osx_image:
+  - xcode9.4
+  - xcode10
 before_install:
   - python -V
   - pip -V
@@ -19,6 +21,9 @@ script:
 matrix:
   allow_failures:
     - env: INTEGRATION_TESTS=true
+  exclude:
+    - os: linux
+      osx_image: xcode10
   include:
     - os: osx
       osx_image: xcode9.4
