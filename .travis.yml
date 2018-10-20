@@ -20,7 +20,8 @@ script:
   - if [ $INTEGRATION_TESTS == 'false' ]; then make test; fi
 matrix:
   allow_failures:
-    - env: INTEGRATION_TESTS=true
+    - os: linux
+      env: INTEGRATION_TESTS=true
   exclude:
     - os: linux
       osx_image: xcode10
