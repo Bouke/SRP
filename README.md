@@ -64,6 +64,14 @@ low failure rates due to the randomness this protocol includes.
 * Python: ❌ [srp][2] is not compatible; it doesn't correctly calculate `k`.
 * Python: ✅ [srptools][3] is compatible.
 
+## Development
+
+### Testing
+
+This project includes unit tests. A few compiler flags are required to run the tests swiftly:
+
+    swift test -c release -Xswiftc -enable-testing
+
 ## References
 
 * [RFC 2945 - The SRP Authentication and Key Exchange System][0]
