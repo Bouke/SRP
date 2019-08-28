@@ -1,34 +1,44 @@
-os:
-  - osx
-  - linux
-env:
-  - INTEGRATION_TESTS=false
-  - INTEGRATION_TESTS=true
 language: generic
-dist: trusty
-osx_image:
-  - xcode9.4
-  - xcode10
-before_install:
-  - python -V
-  - pip -V
-install:
-  - if [ $INTEGRATION_TESTS == 'true' ]; then pip install --upgrade pip; pip install srptools; fi
-  - eval "$(curl -sL https://gist.githubusercontent.com/kylef/5c0475ff02b7c7671d2a/raw/9f442512a46d7a2af7b850d65a7e9bd31edfb09b/swiftenv-install.sh)"
-script: 
-  - if [ $INTEGRATION_TESTS == 'true' ]; then make test-with-python; fi
-  - if [ $INTEGRATION_TESTS == 'false' ]; then make test; fi
+sudo: required
+script: make test
 matrix:
-  allow_failures:
-    - os: linux
-      env: INTEGRATION_TESTS=true
-  exclude:
-    - os: linux
-      osx_image: xcode10
   include:
+    - name: Swift 5
+      os: osx
+      osx_image: xcode10.3
+    - name: Swift 5
+      os: linux
+      dist: trusty
+      before_install:
+        # workaround for https://travis-ci.community/t/then-sudo-apt-get-update-failed-public-key-is-not-available-no-pubkey-6b05f25d762e3157-in-ubuntu-xenial/1728
+        - sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 762E3157
+        - sudo apt update
+        - sudo apt install libavahi-compat-libdnssd-dev
+        - wget https://swift.org/builds/swift-5.0-release/ubuntu1404/swift-5.0-RELEASE/swift-5.0-RELEASE-ubuntu14.04.tar.gz
+        - tar xzf swift-5.0-RELEASE-ubuntu14.04.tar.gz
+        - export PATH=`pwd`/swift-5.0-RELEASE-ubuntu14.04/usr/bin:"${PATH}"
+    - name: Swift 5.1
+      os: osx
+      osx_image: xcode11
+    - name: Validate against srptools library
+      os: linux
+      dist: trusty
+      before_install:
+        # workaround for https://travis-ci.community/t/then-sudo-apt-get-update-failed-public-key-is-not-available-no-pubkey-6b05f25d762e3157-in-ubuntu-xenial/1728
+        - sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 762E3157
+        - sudo apt update
+        - sudo apt install libavahi-compat-libdnssd-dev
+        - wget https://swift.org/builds/swift-5.0-release/ubuntu1404/swift-5.0-RELEASE/swift-5.0-RELEASE-ubuntu14.04.tar.gz
+        - tar xzf swift-5.0-RELEASE-ubuntu14.04.tar.gz
+        - export PATH=`pwd`/swift-5.0-RELEASE-ubuntu14.04/usr/bin:"${PATH}"
+        - python -V
+        - pip -V
+        - sudo pip install --upgrade pip
+        - sudo pip install srptools
+      script: make test-with-python
     - name: Code Quality Checks
       os: osx
-      osx_image: xcode10
+      osx_image: xcode10.3
       install:
         - brew update
         - brew upgrade swiftlint || true

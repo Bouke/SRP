@@ -1,4 +1,4 @@
-// swift-tools-version:4.0
+// swift-tools-version:4.2
 
 import PackageDescription
 
@@ -14,6 +14,5 @@ let package = Package(
     targets: [
         .target(name: "SRP", dependencies: ["Cryptor", "BigInt"], path: "Sources"),
         .testTarget(name: "SRPTests", dependencies: ["Cryptor", "SRP"]),
-    ],
-    swiftLanguageVersions: [4]
+    ]
 )
