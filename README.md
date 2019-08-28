@@ -56,7 +56,7 @@ Swift 3 compatibility.
 
 ## Compatibility with other implementations
 
-I like to believe this implementation does correctly implements the RFC.
+I like to believe this implementation correctly implements the RFC.
 However not all implementations do and might result in not being able to
 authenticate accross implementations. And subtle differences might result in
 low failure rates due to the randomness this protocol includes.
