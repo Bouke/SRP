@@ -1,4 +1,4 @@
-import Cryptor
+import Crypto
 import Foundation
 import SRP
 
@@ -131,7 +131,7 @@ class Remote {
     }
 }
 
-class RemoteServer: Remote {
+class RemoteServer<H: HashFunction>: Remote {
     var verificationKey: Data?
     var privateKey: Data?
     var salt: Data?
@@ -149,14 +149,11 @@ class RemoteServer: Remote {
     ///   - privateKey:
     ///   - salt:
     /// - Throws: on I/O Error
-    init(
-        username: String,
-        password: String,
-        group: Group = .N2048,
-        algorithm: Digest.Algorithm = .sha1,
-        privateKey: Data? = nil,
-        salt: Data? = nil)
-        throws
+    init(username: String,
+         password: String,
+         group: Group = .N2048,
+         privateKey: Data? = nil,
+         salt: Data? = nil) throws
     {
         guard let python = ProcessInfo.processInfo.environment["PYTHON"] else {
             throw RemoteError.noPython
@@ -175,7 +172,7 @@ class RemoteServer: Remote {
                              username.data(using: .utf8)!.hex,
                              password.data(using: .utf8)!.hex,
                              "--group", "\(group)",
-                             "--algorithm", "\(algorithm)"]
+                             "--algorithm", String(describing: H.self)]
         if let privateKey = privateKey {
             process.arguments!.append(contentsOf: ["--private", privateKey.hex])
         }
@@ -228,7 +225,7 @@ class RemoteServer: Remote {
     }
 }
 
-class RemoteClient: Remote {
+class RemoteClient<H: HashFunction>: Remote {
     let username: String
     var privateKey: Data?
     var publicKey: Data?
@@ -242,13 +239,10 @@ class RemoteClient: Remote {
     ///   - algorithm:
     ///   - privateKey:
     /// - Throws: on I/O Error
-    init(
-        username: String,
-        password: String,
-        group: Group = .N2048,
-        algorithm: Digest.Algorithm = .sha1,
-        privateKey: Data? = nil)
-        throws
+    init(username: String,
+         password: String,
+         group: Group = .N2048,
+         privateKey: Data? = nil) throws
     {
         self.username = username
 
@@ -263,7 +257,7 @@ class RemoteClient: Remote {
                              username.data(using: .utf8)!.hex,
                              password.data(using: .utf8)!.hex,
                              "--group", "\(group)",
-                             "--algorithm", "\(algorithm)"]
+                             "--algorithm", String(describing: H.self)]
         if let privateKey = privateKey {
             process.arguments!.append(contentsOf: ["--private", privateKey.hex])
         }

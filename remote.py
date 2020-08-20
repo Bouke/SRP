@@ -71,18 +71,18 @@ groups = {
 }
 
 algorithms = {
-    "sha1": constants.HASH_SHA_1,
-    "sha256": constants.HASH_SHA_256,
+    "SHA1": constants.HASH_SHA_1,
+    "SHA256": constants.HASH_SHA_256,
 }
 
 ensure_hash_sizes = {
-    "sha1": lambda hex: hex.zfill(40),
-    "sha256": lambda hex: hex.zfill(64),
+    "SHA1": lambda hex: hex.zfill(40),
+    "SHA256": lambda hex: hex.zfill(64),
 }
 
 parser = argparse.ArgumentParser(description="SRP Server")
 parser.add_argument("--group", default="N2048")
-parser.add_argument("--algorithm", default="sha1")
+parser.add_argument("--algorithm", default="SHA1")
 parser.add_argument("--salt")
 parser.add_argument("--private")
 
@@ -128,19 +128,19 @@ if args.command == "server":
     # Client => Server: M
     sys.stdout.write("M: ")
     sys.stdout.flush()
-    M = input()
+    M = input().encode('ascii')
 
     # Process client public and verify session key proof.
     server_session.process(A, salt)
-    print("expected M:", server_session.key_proof)
+    print("expected M:", server_session.key_proof.decode('ascii'))
 
     assert server_session.verify_proof(M)
 
     # Server => Client: HAMK
-    print("HAMK:", ensure_hash_size(server_session.key_proof_hash))
+    print("HAMK:", ensure_hash_size(server_session.key_proof_hash).decode('ascii'))
 
     # Always keep the key secret! It is printed to validate the implementation.
-    print("K:", ensure_hash_size(server_session.key))
+    print("K:", ensure_hash_size(server_session.key).decode('ascii'))
 
 if args.command == "client":
     client_session = SRPClientSession(context, private=args.private)
@@ -159,14 +159,14 @@ if args.command == "client":
     client_session.process(B, s)
 
     # Client => Server: M
-    print("M:", ensure_hash_size(client_session.key_proof))
+    print("M:", ensure_hash_size(client_session.key_proof).decode('ascii'))
 
     # Server => Client: HAMK
     sys.stdout.write("HAMK: ")
     sys.stdout.flush()
-    HAMK = input()
+    HAMK = input().encode('ascii')
     assert client_session.verify_proof(HAMK)
     print("OK")
 
     # Always keep the key secret! It is printed to validate the implementation.
-    print("K:", ensure_hash_size(client_session.key))
+    print("K:", ensure_hash_size(client_session.key).decode('ascii'))

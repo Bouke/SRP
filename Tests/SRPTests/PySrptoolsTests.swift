@@ -1,4 +1,4 @@
-import Cryptor
+import Crypto
 import Foundation
 import XCTest
 
@@ -15,62 +15,60 @@ class PySrptoolsTests: XCTestCase {
         ]
     }
 
-    func testClient() {
+    func testClient() throws {
         guard ProcessInfo.processInfo.environment["PYTHON"] != nil else {
-            return NSLog("Skipped integration test at \(#file):\(#line)")
+            return NSLog("Set PYTHON env variable to run test")
         }
 
-        runClientTest(group: .N1024, algorithm: .sha1, username: "bouke", password: "test")
-        runClientTest(group: .N2048, algorithm: .sha1, username: "bouke", password: "test")
-        runClientTest(group: .N3072, algorithm: .sha1, username: "bouke", password: "test")
-        runClientTest(group: .N4096, algorithm: .sha1, username: "bouke", password: "test")
-        runClientTest(group: .N6144, algorithm: .sha1, username: "bouke", password: "test")
-        runClientTest(group: .N8192, algorithm: .sha1, username: "bouke", password: "test")
+        runClientTest(using: Insecure.SHA1.self, group: .N1024, username: "bouke", password: "test")
+        runClientTest(using: Insecure.SHA1.self, group: .N2048, username: "bouke", password: "test")
+        runClientTest(using: Insecure.SHA1.self, group: .N3072, username: "bouke", password: "test")
+        runClientTest(using: Insecure.SHA1.self, group: .N4096, username: "bouke", password: "test")
+        runClientTest(using: Insecure.SHA1.self, group: .N6144, username: "bouke", password: "test")
+        runClientTest(using: Insecure.SHA1.self, group: .N8192, username: "bouke", password: "test")
 
-        runClientTest(group: .N1024, algorithm: .sha256, username: "bouke", password: "test")
-        runClientTest(group: .N2048, algorithm: .sha256, username: "bouke", password: "test")
-        runClientTest(group: .N3072, algorithm: .sha256, username: "bouke", password: "test")
-        runClientTest(group: .N4096, algorithm: .sha256, username: "bouke", password: "test")
-        runClientTest(group: .N6144, algorithm: .sha256, username: "bouke", password: "test")
-        runClientTest(group: .N8192, algorithm: .sha256, username: "bouke", password: "test")
+        runClientTest(using: SHA256.self, group: .N1024, username: "bouke", password: "test")
+        runClientTest(using: SHA256.self, group: .N2048, username: "bouke", password: "test")
+        runClientTest(using: SHA256.self, group: .N3072, username: "bouke", password: "test")
+        runClientTest(using: SHA256.self, group: .N4096, username: "bouke", password: "test")
+        runClientTest(using: SHA256.self, group: .N6144, username: "bouke", password: "test")
+        runClientTest(using: SHA256.self, group: .N8192, username: "bouke", password: "test")
     }
 
-    func testClientUtf8() {
+    func testClientUtf8() throws {
         guard ProcessInfo.processInfo.environment["PYTHON"] != nil else {
-            return NSLog("Skipped integration test at \(#file):\(#line)")
+            return NSLog("Set PYTHON env variable to run test")
         }
 
-        runClientTest(group: .N1024, algorithm: .sha1, username: "bõūkę", password: "tėšt")
+        runClientTest(using: Insecure.SHA1.self, group: .N1024, username: "bõūkę", password: "tėšt")
     }
 
-    func runClientTest(
+    func runClientTest<H: HashFunction>(
+        using hashFunction: H.Type,
         group: Group,
-        algorithm: Digest.Algorithm,
         username: String,
         password: String,
         file: StaticString = #file,
         line: UInt = #line)
     {
-        let server: RemoteServer
+        let server: RemoteServer<H>
         do {
             server = try RemoteServer(username: username,
                                       password: password,
-                                      group: group,
-                                      algorithm: algorithm)
+                                      group: group)
         } catch {
             return XCTFail("Could not start remote server: \(error)", file: file, line: line)
         }
-        let client = Client(username: username,
-                            password: password,
-                            group: group,
-                            algorithm: algorithm)
+        let client = Client<H>(username: username,
+                                password: password,
+                                group: group)
 
         let debugInfo: () -> String = {
             let infos: [String] = [
                 "username: \(username)",
                 "password: \(password)",
                 "group: \(group)",
-                "algorithm: \(algorithm)",
+                "hash function: \(H.self)",
                 "salt: \(server.salt?.hex ?? "N/A")",
                 "verificationKey: \(server.verificationKey?.hex ?? "N/A")",
                 "serverPrivateKey: \(server.privateKey?.hex ?? "N/A")",
@@ -138,58 +136,55 @@ class PySrptoolsTests: XCTestCase {
         XCTAssertEqual(serverSessionKey, client.sessionKey, "Session keys not equal -- \(debugInfo())\(additionalDebug)", file: file, line: line)
     }
 
-    func testServer() {
+    func testServer() throws {
         guard ProcessInfo.processInfo.environment["PYTHON"] != nil else {
-            return NSLog("Skipped integration test at \(#file):\(#line)")
+            return NSLog("Set PYTHON env variable to run test")
         }
 
-        runServerTest(group: .N1024, algorithm: .sha1, username: "bouke", password: "test")
-        runServerTest(group: .N2048, algorithm: .sha1, username: "bouke", password: "test")
-        runServerTest(group: .N3072, algorithm: .sha1, username: "bouke", password: "test")
-        runServerTest(group: .N4096, algorithm: .sha1, username: "bouke", password: "test")
-        runServerTest(group: .N6144, algorithm: .sha1, username: "bouke", password: "test")
-        runServerTest(group: .N8192, algorithm: .sha1, username: "bouke", password: "test")
+        runServerTest(using: Insecure.SHA1.self, group: .N1024, username: "bouke", password: "test")
+        runServerTest(using: Insecure.SHA1.self, group: .N2048, username: "bouke", password: "test")
+        runServerTest(using: Insecure.SHA1.self, group: .N3072, username: "bouke", password: "test")
+        runServerTest(using: Insecure.SHA1.self, group: .N4096, username: "bouke", password: "test")
+        runServerTest(using: Insecure.SHA1.self, group: .N6144, username: "bouke", password: "test")
+        runServerTest(using: Insecure.SHA1.self, group: .N8192, username: "bouke", password: "test")
 
-        runServerTest(group: .N1024, algorithm: .sha256, username: "bouke", password: "test")
-        runServerTest(group: .N2048, algorithm: .sha256, username: "bouke", password: "test")
-        runServerTest(group: .N3072, algorithm: .sha256, username: "bouke", password: "test")
-        runServerTest(group: .N4096, algorithm: .sha256, username: "bouke", password: "test")
-        runServerTest(group: .N6144, algorithm: .sha256, username: "bouke", password: "test")
-        runServerTest(group: .N8192, algorithm: .sha256, username: "bouke", password: "test")
+        runServerTest(using: SHA256.self, group: .N1024, username: "bouke", password: "test")
+        runServerTest(using: SHA256.self, group: .N2048, username: "bouke", password: "test")
+        runServerTest(using: SHA256.self, group: .N3072, username: "bouke", password: "test")
+        runServerTest(using: SHA256.self, group: .N4096, username: "bouke", password: "test")
+        runServerTest(using: SHA256.self, group: .N6144, username: "bouke", password: "test")
+        runServerTest(using: SHA256.self, group: .N8192, username: "bouke", password: "test")
     }
 
-    func testServerUtf8() {
+    func testServerUtf8() throws {
         guard ProcessInfo.processInfo.environment["PYTHON"] != nil else {
-            return NSLog("Skipped integration test at \(#file):\(#line)")
+            return NSLog("Set PYTHON env variable to run test")
         }
 
-        runServerTest(group: .N1024, algorithm: .sha1, username: "bõūkę", password: "tėšt")
+        runServerTest(using: Insecure.SHA1.self, group: .N1024, username: "bõūkę", password: "tėšt")
     }
 
-    func runServerTest(
+    func runServerTest<H: HashFunction>(
+        using hashFunction: H.Type,
         group: Group,
-        algorithm: Digest.Algorithm,
         username: String,
         password: String,
         file: StaticString = #file,
         line: UInt = #line)
     {
-        let (salt, verificationKey) = createSaltedVerificationKey(username: username,
-                                                                  password: password,
-                                                                  group: group,
-                                                                  algorithm: algorithm)
-        let server = Server(username: username,
-                            salt: salt,
-                            verificationKey: verificationKey,
-                            group: group,
-                            algorithm: algorithm)
+        let (salt, verificationKey) = createSaltedVerificationKey(using: hashFunction,
+                                                                  group: group, username: username,
+                                                                  password: password)
+        let server = Server<H>(username: username,
+                                salt: salt,
+                                verificationKey: verificationKey,
+                                group: group)
 
-        let client: RemoteClient
+        let client: RemoteClient<H>
         do {
             client = try RemoteClient(username: username,
                                       password: password,
-                                      group: group,
-                                      algorithm: algorithm)
+                                      group: group)
         } catch {
             return XCTFail("Could not start remote client: \(error)", file: file, line: line)
         }
@@ -199,10 +194,10 @@ class PySrptoolsTests: XCTestCase {
                 "username: \(username)",
                 "password: \(password)",
                 "group: \(group)",
-                "algorithm: \(algorithm)",
+                "hash function: \(H.self)",
                 "salt: \(salt.hex)",
                 "verificationKey: \(verificationKey.hex)",
-                "serverPrivateKey: \(server.privateKey.hex)",
+                "serverPrivateKey: \(server.privateKey.rawRepresentation.hex)",
                 "serverPublicKey: \(server.publicKey.hex)",
                 "clientPrivateKey: \(client.privateKey?.hex ?? "N/A")",
                 "clientPublicKey: \(client.publicKey?.hex ?? "N/A")"
