@@ -1,4 +1,4 @@
-// swift-tools-version:4.2
+// swift-tools-version:5.1
 
 import PackageDescription
 
@@ -8,11 +8,11 @@ let package = Package(
         .library(name: "SRP", targets: ["SRP"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/IBM-Swift/BlueCryptor.git", from: "1.0.31"),
         .package(url: "https://github.com/attaswift/BigInt.git", from: "5.0.0"),
+        .package(url: "https://github.com/Bouke/swift-crypto.git", .exact("1.1.0-rc.2-patched")),
     ],
     targets: [
-        .target(name: "SRP", dependencies: ["Cryptor", "BigInt"], path: "Sources"),
-        .testTarget(name: "SRPTests", dependencies: ["Cryptor", "SRP"]),
+        .target(name: "SRP", dependencies: ["BigInt", "Crypto"], path: "Sources"),
+        .testTarget(name: "SRPTests", dependencies: ["Crypto", "SRP"]),
     ]
 )

@@ -1,6 +1,6 @@
 import Foundation
 import BigInt
-import Cryptor
+import Crypto
 
 /// Creates the salted verification key based on a user's username and
 /// password. Only the salt and verification key need to be stored on the
@@ -10,6 +10,7 @@ import Cryptor
 /// the password from.
 ///
 /// - Parameters:
+///   - using: hash function to use
 ///   - username: user's username
 ///   - password: user's password
 ///   - salt: (optional) custom salt value; if providing a salt, make sure to
@@ -18,16 +19,16 @@ import Cryptor
 ///   - group: `Group` parameters; default is 2048-bits group.
 ///   - algorithm: which `Digest.Algorithm` to use; default is SHA1.
 /// - Returns: salt (s) and verification key (v)
-public func createSaltedVerificationKey(
+public func createSaltedVerificationKey<H: HashFunction>(
+    using hashFunction: H.Type,
+    group: Group = .N2048,
     username: String,
     password: String,
-    salt: Data? = nil,
-    group: Group = .N2048,
-    algorithm: Digest.Algorithm = .sha1)
+    salt: Data? = nil)
     -> (salt: Data, verificationKey: Data)
 {
-    let salt = salt ?? Data(bytes: try! Random.generate(byteCount: 16))
-    let x = calculate_x(algorithm: algorithm, salt: salt, username: username, password: password)
+    let salt = salt ?? randomBytes(16)
+    let x = Implementation<H>.calculate_x(salt: salt, username: username, password: password)
     return createSaltedVerificationKey(from: x, salt: salt, group: group)
 }
 
@@ -60,7 +61,7 @@ func createSaltedVerificationKey(
     group: Group = .N2048)
     -> (salt: Data, verificationKey: Data)
 {
-    let salt = salt ?? Data(bytes: try! Random.generate(byteCount: 16))
+    let salt = salt ?? randomBytes(16)
     let v = calculate_v(group: group, x: x)
     return (salt, v.serialize())
 }
@@ -70,41 +71,46 @@ func pad(_ data: Data, to size: Int) -> Data {
     return Data(count: size - data.count) + data
 }
 
-//u = H(PAD(A) | PAD(B))
-func calculate_u(group: Group, algorithm: Digest.Algorithm, A: Data, B: Data) -> BigUInt {
-    let H = Digest.hasher(algorithm)
-    let size = group.N.serialize().count
-    return BigUInt(H(pad(A, to: size) + pad(B, to: size)))
-}
+enum Implementation<HF: HashFunction> {
+    static func H(_ data: Data) -> Data {
+        return Data(HF.hash(data: data))
+    }
 
-//M1 = H(H(N) XOR H(g) | H(I) | s | A | B | K)
-func calculate_M(group: Group, algorithm: Digest.Algorithm, username: String, salt: Data, A: Data, B: Data, K: Data) -> Data {
-    let H = Digest.hasher(algorithm)
-    let HN_xor_Hg = (H(group.N.serialize()) ^ H(group.g.serialize()))!
-    let HI = H(username.data(using: .utf8)!)
-    return H(HN_xor_Hg + HI + salt + A + B + K)
-}
+    //u = H(PAD(A) | PAD(B))
+    static func calculate_u(group: Group, A: Data, B: Data) -> BigUInt {
+        let size = group.N.serialize().count
+        return BigUInt(H(pad(A, to: size) + pad(B, to: size)))
+    }
 
-//HAMK = H(A | M | K)
-func calculate_HAMK(algorithm: Digest.Algorithm, A: Data, M: Data, K: Data) -> Data {
-    let H = Digest.hasher(algorithm)
-    return H(A + M + K)
-}
+    //M1 = H(H(N) XOR H(g) | H(I) | s | A | B | K)
+    static func calculate_M(group: Group, username: String, salt: Data, A: Data, B: Data, K: Data) -> Data {
+        let HN_xor_Hg = (H(group.N.serialize()) ^ H(group.g.serialize()))!
+        let HI = H(username.data(using: .utf8)!)
+        return H(HN_xor_Hg + HI + salt + A + B + K)
+    }
 
-//k = H(N | PAD(g))
-func calculate_k(group: Group, algorithm: Digest.Algorithm) -> BigUInt {
-    let H = Digest.hasher(algorithm)
-    let size = group.N.serialize().count
-    return BigUInt(H(group.N.serialize() + pad(group.g.serialize(), to: size)))
-}
+    //HAMK = H(A | M | K)
+    static func calculate_HAMK(A: Data, M: Data, K: Data) -> Data {
+        return H(A + M + K)
+    }
 
-//x = H(s | H(I | ":" | P))
-func calculate_x(algorithm: Digest.Algorithm, salt: Data, username: String, password: String) -> BigUInt {
-    let H = Digest.hasher(algorithm)
-    return BigUInt(H(salt + H("\(username):\(password)".data(using: .utf8)!)))
+    //k = H(N | PAD(g))
+    static func calculate_k(group: Group) -> BigUInt {
+        let size = group.N.serialize().count
+        return BigUInt(H(group.N.serialize() + pad(group.g.serialize(), to: size)))
+    }
+
+    //x = H(s | H(I | ":" | P))
+    static func calculate_x(salt: Data, username: String, password: String) -> BigUInt {
+        return BigUInt(H(salt + H("\(username):\(password)".data(using: .utf8)!)))
+    }
 }
 
 // v = g^x % N
 func calculate_v(group: Group, x: BigUInt) -> BigUInt {
     return group.g.power(x, modulus: group.N)
+}
+
+func randomBytes(_ count: Int) -> Data {
+    return Data((0..<count).map { _ in UInt8.random(in: 0...255) })
 }

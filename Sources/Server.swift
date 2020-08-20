@@ -1,10 +1,10 @@
 import Foundation
 import BigInt
-import Cryptor
+import Crypto
 
-/// SRP Server; party that verifies the Client's challenge/response 
+/// SRP Server; party that verifies the Client's challenge/response
 /// against the known password verifier stored for a user.
-public class Server {
+public class Server<H: HashFunction> {
     let b: BigUInt
     let B: BigUInt
 
@@ -15,7 +15,8 @@ public class Server {
     var K: Data?
 
     let group: Group
-    let algorithm: Digest.Algorithm
+
+    typealias impl = Implementation<H>
 
     /// Whether the session is authenticated, i.e. the password
     /// was verified by the server and proof of a valid session
@@ -34,9 +35,6 @@ public class Server {
     ///       username.
     ///   - group: which `Group` to use, must be the same for the
     ///       client as well as the pre-stored verificationKey.
-    ///   - algorithm: which `Digest.Algorithm` to use, again this
-    ///       must be the same for the client as well as the pre-stored
-    ///       verificationKey.
     ///   - privateKey: (optional) custom private key (b); if providing
     ///       the private key of the `Server`, make sure to provide a
     ///       good random key of at least 32 bytes. Default is to
@@ -50,20 +48,18 @@ public class Server {
         salt: Data,
         verificationKey: Data,
         group: Group = .N2048,
-        algorithm: Digest.Algorithm = .sha1,
         privateKey: Data? = nil)
     {
         self.group = group
-        self.algorithm = algorithm
         self.salt = salt
         self.username = username
 
         if let privateKey = privateKey {
             b = BigUInt(privateKey)
         } else {
-            b = BigUInt(Data(bytes: try! Random.generate(byteCount: 128)))
+            b = BigUInt(Curve25519.KeyAgreement.PrivateKey().rawRepresentation)
         }
-        let k = calculate_k(group: group, algorithm: algorithm)
+        let k = impl.calculate_k(group: group)
         v = BigUInt(verificationKey)
         let N = group.N
         let g = group.g
@@ -96,7 +92,7 @@ public class Server {
     ///    - `AuthenticationFailure.keyProofMismatch` if the proof
     ///      doesn't match our own.
     public func verifySession(publicKey clientPublicKey: Data, keyProof clientKeyProof: Data) throws -> Data {
-        let u = calculate_u(group: group, algorithm: algorithm, A: clientPublicKey, B: publicKey)
+        let u = impl.calculate_u(group: group, A: clientPublicKey, B: publicKey)
         let A = BigUInt(clientPublicKey)
         let N = group.N
 
@@ -108,17 +104,17 @@ public class Server {
         // S = (Av^u) mod N
         let S = (A * v.power(u, modulus: N)).power(b, modulus: N)
 
-        let H = Digest.hasher(algorithm)
         // K = H(S)
+        let H = impl.H
         K = H(S.serialize())
 
-        let M = calculate_M(group: group, algorithm: algorithm, username: username, salt: salt, A: clientPublicKey, B: publicKey, K: K!)
+        let M = impl.calculate_M(group: group, username: username, salt: salt, A: clientPublicKey, B: publicKey, K: K!)
         guard clientKeyProof == M else {
             throw AuthenticationFailure.keyProofMismatch
         }
         isAuthenticated = true
 
-        return calculate_HAMK(algorithm: algorithm, A: clientPublicKey, M: M, K: sessionKey!)
+        return impl.calculate_HAMK(A: clientPublicKey, M: M, K: sessionKey!)
     }
 
     /// The server's public key (A). For every authentication
@@ -129,8 +125,8 @@ public class Server {
 
     /// The server's private key (a). For every authentication
     /// session a new random private key is generated.
-    public var privateKey: Data {
-        return b.serialize()
+    public var privateKey: Curve25519.KeyAgreement.PrivateKey {
+        return try! Curve25519.KeyAgreement.PrivateKey(rawRepresentation: b.serialize())
     }
 
     /// The session key (K) that is exchanged during authentication.

@@ -1,15 +1,15 @@
 import Foundation
 import BigInt
-import Cryptor
+import Crypto
 
 /// SRP Client; the party that initializes the authentication and
 /// must proof possession of the correct password.
-public class Client {
+public class Client<H: HashFunction> {
     let a: BigUInt
     let A: BigUInt
 
     let group: Group
-    let algorithm: Digest.Algorithm
+    typealias impl = Implementation<H>
 
     let username: String
     var password: String?
@@ -27,16 +27,14 @@ public class Client {
     private init(
         username: String,
         group: Group = .N2048,
-        algorithm: Digest.Algorithm = .sha1,
         privateKey: Data? = nil)
     {
         self.username = username
         self.group = group
-        self.algorithm = algorithm
         if let privateKey = privateKey {
             a = BigUInt(privateKey)
         } else {
-            a = BigUInt(Data(bytes: try! Random.generate(byteCount: 128)))
+            a = BigUInt(Curve25519.KeyAgreement.PrivateKey().rawRepresentation)
         }
         // A = g^a % N
         A = group.g.power(a, modulus: group.N)
@@ -49,9 +47,6 @@ public class Client {
     ///   - password: user's password.
     ///   - group: which `Group` to use, must be the same for the
     ///       server as well as the pre-stored verificationKey.
-    ///   - algorithm: which `Digest.Algorithm` to use, again this
-    ///       must be the same for the server as well as the pre-stored
-    ///       verificationKey.
     ///   - privateKey: (optional) custom private key (a); if providing
     ///       the private key of the `Client`, make sure to provide a
     ///       good random key of at least 32 bytes. Default is to
@@ -61,10 +56,9 @@ public class Client {
         username: String,
         password: String,
         group: Group = .N2048,
-        algorithm: Digest.Algorithm = .sha1,
         privateKey: Data? = nil)
     {
-        self.init(username: username, group: group, algorithm: algorithm, privateKey: privateKey)
+        self.init(username: username, group: group, privateKey: privateKey)
         self.password = password
     }
 
@@ -75,9 +69,6 @@ public class Client {
     ///   - precomputedX: precomputed SRP x.
     ///   - group: which `Group` to use, must be the same for the
     ///       server as well as the pre-stored verificationKey.
-    ///   - algorithm: which `Digest.Algorithm` to use, again this
-    ///       must be the same for the server as well as the pre-stored
-    ///       verificationKey.
     ///   - privateKey: (optional) custom private key (a); if providing
     ///       the private key of the `Client`, make sure to provide a
     ///       good random key of at least 32 bytes. Default is to
@@ -87,10 +78,9 @@ public class Client {
         username: String,
         precomputedX: Data,
         group: Group = .N2048,
-        algorithm: Digest.Algorithm = .sha1,
         privateKey: Data? = nil)
     {
-        self.init(username: username, group: group, algorithm: algorithm, privateKey: privateKey)
+        self.init(username: username, group: group, privateKey: privateKey)
         self.precomputedX = BigUInt(precomputedX)
     }
 
@@ -113,7 +103,7 @@ public class Client {
     /// - Throws: `AuthenticationFailure.invalidPublicKey` if the server's 
     ///     public key is invalid (i.e. B % N is zero).
     public func processChallenge(salt: Data, publicKey serverPublicKey: Data) throws -> Data {
-        let H = Digest.hasher(algorithm)
+        let H = impl.H
         let N = group.N
 
         let B = BigUInt(serverPublicKey)
@@ -122,9 +112,9 @@ public class Client {
             throw AuthenticationFailure.invalidPublicKey
         }
 
-        let u = calculate_u(group: group, algorithm: algorithm, A: publicKey, B: serverPublicKey)
-        let k = calculate_k(group: group, algorithm: algorithm)
-        let x = self.precomputedX ?? calculate_x(algorithm: algorithm, salt: salt, username: username, password: password!)
+        let u = impl.calculate_u(group: group, A: publicKey, B: serverPublicKey)
+        let k = impl.calculate_k(group: group)
+        let x = self.precomputedX ?? impl.calculate_x(salt: salt, username: username, password: password!)
         let v = calculate_v(group: group, x: x)
 
         // shared secret
@@ -138,10 +128,10 @@ public class Client {
         K = H(S.serialize())
 
         // client verification
-        let M = calculate_M(group: group, algorithm: algorithm, username: username, salt: salt, A: publicKey, B: serverPublicKey, K: K!)
+        let M = impl.calculate_M(group: group, username: username, salt: salt, A: publicKey, B: serverPublicKey, K: K!)
 
         // server verification
-        HAMK = calculate_HAMK(algorithm: algorithm, A: publicKey, M: M, K: K!)
+        HAMK = impl.calculate_HAMK(A: publicKey, M: M, K: K!)
         return M
     }
 
