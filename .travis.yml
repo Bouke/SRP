@@ -3,34 +3,29 @@ sudo: required
 script: make test
 matrix:
   include:
-    - name: Swift 5
-      os: osx
-      osx_image: xcode10.3
-    - name: Swift 5
-      os: linux
-      dist: trusty
-      before_install:
-        # workaround for https://travis-ci.community/t/then-sudo-apt-get-update-failed-public-key-is-not-available-no-pubkey-6b05f25d762e3157-in-ubuntu-xenial/1728
-        - sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 762E3157
-        - sudo apt update
-        - sudo apt install libavahi-compat-libdnssd-dev
-        - wget https://swift.org/builds/swift-5.0-release/ubuntu1404/swift-5.0-RELEASE/swift-5.0-RELEASE-ubuntu14.04.tar.gz
-        - tar xzf swift-5.0-RELEASE-ubuntu14.04.tar.gz
-        - export PATH=`pwd`/swift-5.0-RELEASE-ubuntu14.04/usr/bin:"${PATH}"
     - name: Swift 5.1
       os: osx
       osx_image: xcode11
+    - name: Swift 5.2
+      os: osx
+      osx_image: xcode11.4
+    - name: Swift 5.3
+      os: osx
+      osx_image: xcode12
+    - name: Swift 5.1
+      os: linux
+      dist: trusty
+      before_install:
+        - wget https://swift.org/builds/swift-5.1-release/ubuntu1404/swift-5.1-RELEASE/swift-5.1-RELEASE-ubuntu14.04.tar.gz
+        - tar xzf swift-5.1-RELEASE-ubuntu14.04.tar.gz
+        - export PATH=`pwd`/swift-5.1-RELEASE-ubuntu14.04/usr/bin:"${PATH}"
     - name: Validate against srptools library
       os: linux
       dist: trusty
       before_install:
-        # workaround for https://travis-ci.community/t/then-sudo-apt-get-update-failed-public-key-is-not-available-no-pubkey-6b05f25d762e3157-in-ubuntu-xenial/1728
-        - sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 762E3157
-        - sudo apt update
-        - sudo apt install libavahi-compat-libdnssd-dev
-        - wget https://swift.org/builds/swift-5.0-release/ubuntu1404/swift-5.0-RELEASE/swift-5.0-RELEASE-ubuntu14.04.tar.gz
-        - tar xzf swift-5.0-RELEASE-ubuntu14.04.tar.gz
-        - export PATH=`pwd`/swift-5.0-RELEASE-ubuntu14.04/usr/bin:"${PATH}"
+        - wget https://swift.org/builds/swift-5.1-release/ubuntu1404/swift-5.1-RELEASE/swift-5.1-RELEASE-ubuntu14.04.tar.gz
+        - tar xzf swift-5.1-RELEASE-ubuntu14.04.tar.gz
+        - export PATH=`pwd`/swift-5.1-RELEASE-ubuntu14.04/usr/bin:"${PATH}"
         - python -V
         - pip -V
         - sudo pip install --upgrade pip
@@ -38,13 +33,15 @@ matrix:
       script: make test-with-python
     - name: Code Quality Checks
       os: osx
-      osx_image: xcode10.3
+      osx_image: xcode11
       install:
-        - brew update
         - brew upgrade swiftlint || true
+      script: swiftlint --strict
+    - name: SonarCloud scanner
+      os: osx
+      osx_image: xcode11
       addons:
         sonarcloud:
           organization: bouke-github
-      script:
-        - swiftlint --strict
-        - sonar-scanner
+      before_script: git fetch --unshallow --quiet
+      script: sonar-scanner
