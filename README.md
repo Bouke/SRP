@@ -5,7 +5,7 @@ Secure Remote Password is a authentication protocol to prove your identity to
 another party, using a password, but without ever revealing that password to
 other parties. Not even the party you are proving your identity. See [Secure Remote Password protocol][5] for more information on this protocol.
 
-[![Build Status](https://travis-ci.org/Bouke/SRP.svg?branch=master)](https://travis-ci.org/Bouke/SRP)
+![CI status](https://github.com/Bouke/SRP/workflows/Test/badge.svg)
 
 ## Example usage
 

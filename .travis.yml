@@ -1,47 +1,12 @@
+branches:
+  only:
+  - master
 language: generic
 sudo: required
-script: make test
+script: swift test -c release -Xswiftc -enable-testing
 matrix:
   include:
-    - name: Swift 5.1
+    - name: Swift 5.1 on macOS 10.14
       os: osx
-      osx_image: xcode11
-    - name: Swift 5.2
-      os: osx
-      osx_image: xcode11.4
-    - name: Swift 5.3
-      os: osx
-      osx_image: xcode12
-    - name: Swift 5.1
-      os: linux
-      dist: trusty
-      before_install:
-        - wget https://swift.org/builds/swift-5.1-release/ubuntu1404/swift-5.1-RELEASE/swift-5.1-RELEASE-ubuntu14.04.tar.gz
-        - tar xzf swift-5.1-RELEASE-ubuntu14.04.tar.gz
-        - export PATH=`pwd`/swift-5.1-RELEASE-ubuntu14.04/usr/bin:"${PATH}"
-    - name: Validate against srptools library
-      os: linux
-      dist: trusty
-      before_install:
-        - wget https://swift.org/builds/swift-5.1-release/ubuntu1404/swift-5.1-RELEASE/swift-5.1-RELEASE-ubuntu14.04.tar.gz
-        - tar xzf swift-5.1-RELEASE-ubuntu14.04.tar.gz
-        - export PATH=`pwd`/swift-5.1-RELEASE-ubuntu14.04/usr/bin:"${PATH}"
-        - python -V
-        - pip -V
-        - sudo pip install --upgrade pip
-        - sudo pip install srptools
-      script: make test-with-python
-    - name: Code Quality Checks
-      os: osx
-      osx_image: xcode11
-      install:
-        - brew upgrade swiftlint || true
-      script: swiftlint --strict
-    - name: SonarCloud scanner
-      os: osx
-      osx_image: xcode11
-      addons:
-        sonarcloud:
-          organization: bouke-github
-      before_script: git fetch --unshallow --quiet
-      script: sonar-scanner
+      osx_image: xcode11.3
+
