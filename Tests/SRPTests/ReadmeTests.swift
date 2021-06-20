@@ -1,5 +1,5 @@
 import Foundation
-import Cryptor
+import Crypto
 import SRP
 import BigInt
 import XCTest
@@ -16,11 +16,11 @@ class ReadmeTests: XCTestCase {
     func test() throws {
         // This is a database of users, along with their salted verification keys
         let userStore: [String: (salt: Data, verificationKey: Data)] = [
-            "alice": createSaltedVerificationKey(username: "alice", password: "password123"),
-            "bob": createSaltedVerificationKey(username: "bob", password: "qwerty12345")
+            "alice": createSaltedVerificationKey(using: Insecure.SHA1.self, username: "alice", password: "password123"),
+            "bob": createSaltedVerificationKey(using: Insecure.SHA1.self, username: "bob", password: "qwerty12345")
         ]
         // Alice wants to authenticate, she sends her username to the server.
-        let client = Client(username: "alice", password: "password123")
+        let client = Client<Insecure.SHA1>(username: "alice", password: "password123")
         try runCommonTest(client: client, userStore: userStore)
     }
 
@@ -32,18 +32,17 @@ class ReadmeTests: XCTestCase {
             ]
 
         // Alice wants to authenticate, she sends her username to the server.
-        let client = Client(username: "alice", precomputedX: Data("12345".utf8))
+        let client = Client<Insecure.SHA1>(username: "alice", precomputedX: Data("12345".utf8))
         try runCommonTest(client: client, userStore: userStore)
     }
 
-    func runCommonTest(client: Client, userStore: [String: (salt: Data, verificationKey: Data)]) throws {
+    func runCommonTest<H: HashFunction>(client: Client<H>, userStore: [String: (salt: Data, verificationKey: Data)]) throws {
         // Alice wants to authenticate
         let (username, clientPublicKey) = client.startAuthentication()
 
-        let server = Server(
-            username: username,
-            salt: userStore[username]!.salt,
-            verificationKey: userStore[username]!.verificationKey)
+        let server = Server<H>(username: username,
+                                salt: userStore[username]!.salt,
+                                verificationKey: userStore[username]!.verificationKey)
 
         // The server shares Alice's salt and its public key (the challenge).
         let (salt, serverPublicKey) = server.getChallenge()
