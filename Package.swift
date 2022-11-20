@@ -1,4 +1,4 @@
-// swift-tools-version:5.1
+// swift-tools-version:5.3
 
 import PackageDescription
 
@@ -18,7 +18,7 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-crypto.git", from: "1.1.0"),
     ],
     targets: [
-        .target(name: "SRP", dependencies: ["BigInt", "Crypto"], path: "Sources"),
-        .testTarget(name: "SRPTests", dependencies: ["Crypto", "SRP"]),
+		.target(name: "SRP", dependencies: ["BigInt", .product(name: "Crypto", package: "swift-crypto")], path: "Sources"),
+	    .testTarget(name: "SRPTests", dependencies: [.product(name: "Crypto", package: "swift-crypto"), "SRP"]),
     ]
 )
