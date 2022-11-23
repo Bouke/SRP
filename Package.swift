@@ -18,7 +18,7 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-crypto.git", from: "1.1.0"),
     ],
     targets: [
-		.target(name: "SRP", dependencies: ["BigInt", .product(name: "Crypto", package: "swift-crypto")], path: "Sources"),
-	    .testTarget(name: "SRPTests", dependencies: [.product(name: "Crypto", package: "swift-crypto"), "SRP"]),
+        .target(name: "SRP", dependencies: ["BigInt", .product(name: "Crypto", package: "swift-crypto")], path: "Sources"),
+        .testTarget(name: "SRPTests", dependencies: [.product(name: "Crypto", package: "swift-crypto"), "SRP"]),
     ]
 )
